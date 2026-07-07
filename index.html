@@ -198,8 +198,8 @@
             left: 0;
             transform-origin: 0 0;
             transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            width: 851px; 
-            height: 737px;
+            width: 1000px; 
+    height: 1500px; 
             background-image: url('./Snoopy garden map.jpg');
             background-size: 100% 100%;
             background-repeat: no-repeat;
@@ -1048,11 +1048,20 @@
                 const container = document.getElementById('map-container');
                 if(!container || container.clientWidth === 0) return; 
                 
-                const scale = container.clientWidth / 851;
-                state.map.minScale = Math.max(scale, 0.3); 
+                // 🔀 가로, 세로 스케일을 각각 계산 (현재 기준 좌표 851x737)
+                const scaleX = container.clientWidth / 851;
+                const scaleY = container.clientHeight / 737;
+                
+                // 🔀 둘 중 더 작은 값을 선택하여 화면에 위아래/좌우가 잘리지 않도록 맞춤 (object-fit: contain 효과)
+                const fitScale = Math.min(scaleX, scaleY);
+                
+                state.map.minScale = Math.max(fitScale, 0.3); 
                 state.map.scale = state.map.minScale;
+                
+                // 정중앙에 위치하도록 x, y 좌표 설정
                 state.map.x = (container.clientWidth - (851 * state.map.scale)) / 2;
                 state.map.y = (container.clientHeight - (737 * state.map.scale)) / 2;
+                
                 document.querySelectorAll('.pin-popup').forEach(p => p.classList.remove('show'));
                 document.querySelectorAll('.map-pin').forEach(p => p.classList.remove('active-pin'));
                 updateMapTransform();
