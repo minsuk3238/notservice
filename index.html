@@ -193,17 +193,17 @@
         .map-container:active { cursor: grabbing; }
 
         .map-content {
-            position: absolute;
-            top: 0;
-            left: 0;
-            transform-origin: 0 0;
-            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            width: 1500px; 
-    height: 2400px; 
-            background-image: url('./Snoopy garden map.jpg');
-            background-size: 100% 100%;
-            background-repeat: no-repeat;
-        }
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: 0 0;
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    width: 1500px;  /* 🔀 851에서 1500으로 변경 */
+    height: 2400px; /* 🔀 737에서 2400으로 변경 */
+    background-image: url('./Snoopy garden map.jpg');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+}
 
         .map-pin {
             position: absolute;
@@ -1024,25 +1024,27 @@
             }
 
             function constrainMap() {
-                const container = document.getElementById('map-container');
-                if(!container) return;
-                const mapWidth = 851 * state.map.scale;
-                const mapHeight = 737 * state.map.scale;
-                const containerWidth = container.clientWidth;
-                const containerHeight = container.clientHeight;
+    const container = document.getElementById('map-container');
+    if(!container) return;
+    
+    // 🔀 851, 737 대신 1500, 2400을 사용합니다.
+    const mapWidth = 1500 * state.map.scale;
+    const mapHeight = 2400 * state.map.scale;
+    const containerWidth = container.clientWidth;
+    const containerHeight = container.clientHeight;
 
-                if (mapWidth <= containerWidth) state.map.x = (containerWidth - mapWidth) / 2;
-                else {
-                    if (state.map.x > 0) state.map.x = 0;
-                    if (state.map.x < containerWidth - mapWidth) state.map.x = containerWidth - mapWidth;
-                }
+    if (mapWidth <= containerWidth) state.map.x = (containerWidth - mapWidth) / 2;
+    else {
+        if (state.map.x > 0) state.map.x = 0;
+        if (state.map.x < containerWidth - mapWidth) state.map.x = containerWidth - mapWidth;
+    }
 
-                if (mapHeight <= containerHeight) state.map.y = (containerHeight - mapHeight) / 2;
-                else {
-                    if (state.map.y > 0) state.map.y = 0;
-                    if (state.map.y < containerHeight - mapHeight) state.map.y = containerHeight - mapHeight;
-                }
-            }
+    if (mapHeight <= containerHeight) state.map.y = (containerHeight - mapHeight) / 2;
+    else {
+        if (state.map.y > 0) state.map.y = 0;
+        if (state.map.y < containerHeight - mapHeight) state.map.y = containerHeight - mapHeight;
+    }
+}
 
             function resetMapZoom() {
                 const container = document.getElementById('map-container');
