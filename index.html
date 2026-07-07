@@ -26,6 +26,20 @@
             font-weight: bold;
         }
 
+        @font-face {
+            font-family: 'GmarketSansMedium';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'GmarketSansBold';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.woff') format('woff');
+            font-weight: bold;
+            font-style: normal;
+        }
+
         :root {
             --lucy-yellow: #FFCC00;
             --comic-black: #1A1A1A;
@@ -54,7 +68,8 @@
 
         .title-font { font-family: 'NeutraText-Bold', 'Noto Sans KR', sans-serif; }
         
-        .handwriting { font-family: '궁서', 'Gungsuh', serif !important; font-weight: bold; }
+        .gmarket-sans-medium { font-family: 'GmarketSansMedium', sans-serif !important; }
+        .gmarket-sans-bold { font-family: 'GmarketSansBold', sans-serif !important; font-weight: bold; }
 
         .app-container {
             width: 100%;
@@ -377,18 +392,37 @@
             background-color: white; 
         }
 
+        /* --- 수료증 내 커스텀 텍스트 --- */
+        .cert-title {
+            position: absolute;
+            top: calc(260 / 2754 * 100%);
+            left: 50%;
+            transform: translateX(-50%);
+            color: #000;
+            font-size: 7.37cqi; /* 약 85pt에 해당 */
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .cert-body {
+            position: absolute;
+            top: calc(828 / 2754 * 100%);
+            left: 50%;
+            transform: translateX(-50%);
+            color: #000;
+            font-size: 5.21cqi; /* 약 60pt에 해당 */
+            text-align: center;
+            line-height: 1.6;
+            white-space: nowrap;
+        }
+
         .cert-name-box {
             position: absolute;
-            left: 65.1%; 
-            width: 19.53%; 
-            top: 27.05%; 
-            height: 2.36%; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            top: calc(1122 / 2754 * 100%);
+            left: calc(554 / 1536 * 100%);
             color: #000;
             white-space: nowrap;
-            font-size: 8cqi;
+            font-size: 6cqi;
         }
     </style>
 </head>
@@ -410,7 +444,7 @@
                     </div>
                 </div>
                 <p class="font-bold text-center text-gray-800 leading-relaxed mb-4 text-[15px]" style="word-break: break-all;">
-                    "안녕! 스누피 가든에 온 걸 환영해!<br>
+                  "안녕! 스누피 가든에 온 걸 환영해!<br>
                     하단에 있는 <span class="text-[#2E9441] font-black">지도 버튼</span>을 눌러 코스를 시작해봐.<br>
                     나무의 비밀을 알려줄게!"
                 </p>
@@ -530,7 +564,15 @@
 
         <div id="view-certificate" class="view-content">
             <div class="cert-wrapper" id="cert-capture-area">
-                <div class="cert-name-box handwriting" id="final-cert-name">찰리 브라운</div>
+                <div class="cert-title gmarket-sans-bold">수료증</div>
+                <div class="cert-body gmarket-sans-medium">
+                    위 사람은 스누피가든에서<br>
+                    피너츠 친구들과 제주의 자연속에서<br>
+                    온전한 쉼을 경험하고<br>
+                    식물들과 다정하게 교감하였기에<br>
+                    이 증서를 수여합니다.
+                </div>
+                <div class="cert-name-box gmarket-sans-medium" id="final-cert-name">찰리 브라운</div>
             </div>
             
             <div class="w-full max-w-[420px] px-4 mt-6 flex flex-col gap-3" id="cert-action-buttons">
@@ -677,7 +719,7 @@
                 map: { scale: 1, x: 0, y: 0, isDragging: false, startX: 0, startY: 0, minScale: 0.3, maxScale: 3 },
                 finalTest: { questions: [], currentStep: 0 }
             };
-
+            
             const DB_PLANTS = {
                 "p_1": {
                     id: "p_1", name: "팽나무", type: "관찰 식물",
@@ -877,7 +919,6 @@
                             resetMapZoom(); // 탭을 다시 열 때도 크기 원상복구
                         }
                     }, 50);
-
                 } else if(tabName === 'collection') {
                     renderCollection();
                     document.getElementById('view-collection').classList.add('active');
@@ -943,6 +984,7 @@
                             focusOnPin(plant.mapCoords.x, plant.mapCoords.y, pin, popup);
                         }
                     };
+
                     mapContent.appendChild(pin);
                     mapContent.appendChild(popup);
                 });
@@ -981,7 +1023,6 @@
                         maskPath.setAttribute('stroke', 'white');
                         maskPath.setAttribute('stroke-width', '10');
                         maskPath.setAttribute('fill', 'none');
-
                         mask.appendChild(maskPath);
                         defs.appendChild(mask);
 
@@ -1037,10 +1078,8 @@
                 
                 const scaleX = container.clientWidth / 1500;
                 const scaleY = container.clientHeight / 2400;
-                
                 // 화면을 지도로 완전히 덮기 위해 Math.max 사용
                 const fitScale = Math.max(scaleX, scaleY);
-                
                 state.map.minScale = fitScale;
                 state.map.scale = fitScale;
                 
@@ -1156,13 +1195,13 @@
                     'plant_id': qrId,
                     'plant_name': data.name
                 });
-                
+
                 document.getElementById('plant-name').innerText = data.name;
                 
                 const imgEl = document.getElementById('comic-strip-img');
                 imgEl.src = data.comicImg;
                 imgEl.onerror = () => { imgEl.src = `https://placehold.co/400x400/FFCC00/000?text=${data.name}`; };
-                
+
                 document.getElementById('lucy-dialogue').innerText = data.lucyMessage;
                 
                 const badge = document.getElementById('mission-type-badge');
@@ -1170,7 +1209,7 @@
                 badge.className = `text-white text-xs font-bold px-2 py-1 rounded-full ${data.type === '상록수' ? 'bg-green-700' : 'bg-orange-500'}`;
                 
                 document.getElementById('quiz-question').innerText = data.quiz.question;
-                
+
                 const optionsContainer = document.getElementById('quiz-options');
                 optionsContainer.innerHTML = '';
                 data.quiz.options.forEach((opt, index) => {
@@ -1224,6 +1263,7 @@
 
             function showSuccessModal(plantData) {
                 document.getElementById('success-plant-name').innerText = plantData.name;
+
                 const imgEl = document.getElementById('success-comic-img');
                 imgEl.src = plantData.comicImg;
                 imgEl.onerror = () => { imgEl.src = `https://placehold.co/400x400/FFCC00/000?text=${plantData.name}`; };
@@ -1263,9 +1303,11 @@
 
             function showAllClearModal() {
                 gtag('event', 'all_plants_cleared', { 'event_category': 'game_flow' });
+
                 const modal = document.getElementById('all-clear-modal');
                 const card = document.getElementById('all-clear-card');
                 modal.classList.remove('opacity-0', 'pointer-events-none');
+
                 setTimeout(() => {
                     card.classList.remove('scale-90');
                     card.classList.add('scale-100');
@@ -1315,6 +1357,7 @@
 
             function showDetailModal(plantId) {
                 const data = DB_PLANTS[plantId];
+
                 gtag('event', 'view_book_detail', { 
                     'event_category': 'engagement',
                     'plant_id': plantId,
@@ -1331,6 +1374,7 @@
                 const modal = document.getElementById('detail-modal');
                 const card = document.getElementById('detail-card');
                 modal.classList.remove('opacity-0', 'pointer-events-none');
+                
                 setTimeout(() => {
                     card.classList.remove('scale-90');
                     card.classList.add('scale-100');
@@ -1346,6 +1390,7 @@
 
             function renderCollection() {
                 document.getElementById('collection-count').innerText = state.collectedIds.length;
+                
                 const grid = document.getElementById('stamp-grid');
                 grid.innerHTML = '';
 
@@ -1371,9 +1416,10 @@
                 const btn = document.getElementById('final-test-btn');
                 const btnText = document.getElementById('final-btn-text');
                 const surveyBtn = document.getElementById('survey-reopen-btn');
-
+                
                 if(state.collectedIds.length === ALL_PLANTS_LIST.length) { 
                     btn.classList.remove('hidden');
+                    
                     if(state.hasCertificate) {
                         btnText.innerText = "내 인증서 다시 보기";
                         btn.classList.replace('bg-orange-500', 'bg-[#2E9441]');
@@ -1399,6 +1445,7 @@
 
             function startFinalTest() {
                 gtag('event', 'final_test_start', { 'event_category': 'final_test' });
+
                 const shuffled = [...ALL_PLANTS_LIST].sort(() => 0.5 - Math.random());
                 state.finalTest.questions = shuffled.slice(0, 2);
                 state.finalTest.currentStep = 0;
@@ -1415,7 +1462,7 @@
                 
                 const hint = plant.fullDesc;
                 document.getElementById('final-quiz-desc').innerText = `"${hint}"`;
-                
+
                 const optionsContainer = document.getElementById('final-quiz-options');
                 optionsContainer.innerHTML = '';
                 
@@ -1475,19 +1522,17 @@
                 }
 
                 gtag('event', 'generate_certificate', { 'event_category': 'final_test' });
-                
+
                 const nameEl = document.getElementById('final-cert-name');
                 nameEl.innerText = nameInput;
                 
-                // 자바스크립트에서도 생성 시 궁서체 명시 적용
-                nameEl.style.fontFamily = "'궁서', 'Gungsuh', serif";
-                
+                // 이름 길이에 따른 글자 크기 동적 조절 (단, cqi단위 유지)
                 if (nameInput.length >= 5) {
                     nameEl.style.fontSize = "4.5cqi";
                 } else if (nameInput.length >= 3) {
                     nameEl.style.fontSize = "5.5cqi";
                 } else {
-                    nameEl.style.fontSize = "6.5cqi";
+                    nameEl.style.fontSize = "6cqi";
                 }
 
                 state.hasCertificate = true;
