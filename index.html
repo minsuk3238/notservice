@@ -1254,15 +1254,27 @@
             }
 
             function showToast(msg) {
-                const toast = document.getElementById('toast');
-                document.getElementById('toast-msg').innerText = msg;
-                toast.classList.remove('opacity-0', 'translate-y-[-20px]');
-                toast.classList.add('opacity-100', 'translate-y-0');
-                setTimeout(() => {
-                    toast.classList.remove('opacity-100', 'translate-y-0');
-                    toast.classList.add('opacity-0', 'translate-y-[-20px]');
-                }, 2000);
-            }
+    const toast = document.getElementById('toast');
+    const toastIcon = toast.querySelector('i'); // 토스트 안의 아이콘 선택
+    
+    // 메시지 내용에 따라 아이콘과 색상을 동적으로 변경
+    if (msg.includes('성공') || msg.includes('저장') || msg.includes('통과')) {
+        // 성공 케이스 (초록색 체크)
+        toastIcon.className = 'fa-solid fa-check text-green-400 mr-2 text-lg';
+    } else {
+        // 실패/경고 케이스 (빨간색 엑스)
+        toastIcon.className = 'fa-solid fa-xmark text-red-400 mr-2 text-lg';
+    }
+
+    document.getElementById('toast-msg').innerText = msg;
+    toast.classList.remove('opacity-0', 'translate-y-[-20px]');
+    toast.classList.add('opacity-100', 'translate-y-0');
+    
+    setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'translate-y-[-20px]');
+    }, 2000);
+}
 
             function showSuccessModal(plantData) {
                 document.getElementById('success-plant-name').innerText = plantData.name;
