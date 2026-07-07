@@ -1051,19 +1051,20 @@
     }
 }
 
-           function resetMapZoom() {
+          function resetMapZoom() {
     const container = document.getElementById('map-container');
     if(!container || container.clientWidth === 0) return; 
     
     const scaleX = container.clientWidth / 1500;
     const scaleY = container.clientHeight / 2400;
     
-    // 🔀 둘 중 작은 스케일을 찾은 뒤, 0.9를 곱해 화면 안쪽으로 10%의 여백을 줍니다.
-    const fitScale = Math.min(scaleX, scaleY) * 0.9;
+    // 🔀 Math.min 대신 Math.max를 사용하여 여백 없이 화면을 지도로 완전히 덮습니다.
+    const fitScale = Math.max(scaleX, scaleY);
     
     state.map.minScale = fitScale; 
     state.map.scale = fitScale;
     
+    // 정중앙에 위치하도록 x, y 좌표 설정
     state.map.x = (container.clientWidth - (1500 * state.map.scale)) / 2;
     state.map.y = (container.clientHeight - (2400 * state.map.scale)) / 2;
     
