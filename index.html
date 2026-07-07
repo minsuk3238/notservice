@@ -366,15 +366,15 @@
         }
         .stamp-anim { animation: stampIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 
-        #view-certificate {
-            padding: 0;
-            background-color: #f3f4f6;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            overflow-y: auto;
-        }
+       #view-certificate {
+    padding: 2rem 0; /* 👈 위아래 약간의 여백을 주어 딱 붙지 않게 조절 */
+    background-color: #f3f4f6;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* 👈 콘텐츠를 위에서부터 차례대로 배치하여 잘림 방지 */
+    overflow-y: auto;
+}
         #view-certificate.active {
             display: flex;
         }
