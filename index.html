@@ -874,17 +874,22 @@
                     document.querySelectorAll('.nav-item')[0].classList.add('active');
                 } else if(tabName === 'mission') {
                     document.getElementById('view-mission').classList.add('active');
-                } else if(tabName === 'map') {
-                    document.getElementById('view-map').classList.add('active');
-                    document.querySelectorAll('.nav-item')[1].classList.add('active');
-                    
+               } else if(tabName === 'map') {
+                document.getElementById('view-map').classList.add('active');
+                document.querySelectorAll('.nav-item')[1].classList.add('active');
+                
+                // 🔀 화면 레이아웃이 확실히 잡힌 뒤(50ms 후)에 지도를 계산하도록 타이머 적용
+                setTimeout(() => {
                     if(document.getElementById('map-content').children.length <= 1) { 
                         initMap();
                         setupMapDragging(document.getElementById('map-container'), document.getElementById('map-content'));
                     } else {
                         renderMapPins();
+                        resetMapZoom(); // 탭을 다시 열 때도 크기 원상복구
                     }
-                } else if(tabName === 'collection') {
+                }, 50);
+
+            } else if(tabName === 'collection') {
                     renderCollection();
                     document.getElementById('view-collection').classList.add('active');
                     document.querySelectorAll('.nav-item')[2].classList.add('active');
@@ -1046,28 +1051,26 @@
     }
 }
 
-            function resetMapZoom() {
-                const container = document.getElementById('map-container');
-                if(!container || container.clientWidth === 0) return; 
-                
-                // 🔀 가로, 세로 스케일을 각각 계산 (현재 기준 좌표 851x737)
-                const scaleX = container.clientWidth / 851;
-                const scaleY = container.clientHeight / 737;
-                
-                // 🔀 둘 중 더 작은 값을 선택하여 화면에 위아래/좌우가 잘리지 않도록 맞춤 (object-fit: contain 효과)
-                const fitScale = Math.min(scaleX, scaleY);
-                
-                state.map.minScale = Math.max(fitScale, 0.3); 
-                state.map.scale = state.map.minScale;
-                
-                // 정중앙에 위치하도록 x, y 좌표 설정
-                state.map.x = (container.clientWidth - (851 * state.map.scale)) / 2;
-                state.map.y = (container.clientHeight - (737 * state.map.scale)) / 2;
-                
-                document.querySelectorAll('.pin-popup').forEach(p => p.classList.remove('show'));
-                document.querySelectorAll('.map-pin').forEach(p => p.classList.remove('active-pin'));
-                updateMapTransform();
-            }
+           function resetMapZoom() {
+    const container = document.getElementById('map-container');
+    if(!container || container.clientWidth === 0) return; 
+    
+    const scaleX = container.clientWidth / 1500;
+    const scaleY = container.clientHeight / 2400;
+    
+    // 🔀 둘 중 작은 스케일을 찾은 뒤, 0.9를 곱해 화면 안쪽으로 10%의 여백을 줍니다.
+    const fitScale = Math.min(scaleX, scaleY) * 0.9;
+    
+    state.map.minScale = fitScale; 
+    state.map.scale = fitScale;
+    
+    state.map.x = (container.clientWidth - (1500 * state.map.scale)) / 2;
+    state.map.y = (container.clientHeight - (2400 * state.map.scale)) / 2;
+    
+    document.querySelectorAll('.pin-popup').forEach(p => p.classList.remove('show'));
+    document.querySelectorAll('.map-pin').forEach(p => p.classList.remove('active-pin'));
+    updateMapTransform();
+}
 
             function focusOnPin(pinX, pinY, activePinElement, popupElement) {
                 const container = document.getElementById('map-container');
