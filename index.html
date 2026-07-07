@@ -417,14 +417,16 @@
         }
 
         .cert-name-box {
-            position: absolute;
-            top: calc(500 / 2754 * 100%); /* 수료증 타이틀과 본문 중간 위치로 조정 */
-            left: calc(1200 / 1536 * 100%); /* X축 1200px 위치 지정 */
-            transform: translateX(-50%); /* 지정된 위치를 정중앙으로 맞춤 */
-            color: #000;
-            white-space: nowrap;
-            font-size: 6cqi;
-        }
+    position: absolute;
+    top: calc(500 / 2754 * 100%);
+    left: calc(1200 / 1536 * 100%);
+    transform: translateX(-50%);
+    color: #000;
+    white-space: nowrap;
+    /* 추가: 글자가 너무 길어질 경우를 대비해 최대 너비 지정 */
+    max-width: 40cqi; 
+    overflow: visible;
+}
     </style>
 </head>
 <body>
@@ -1516,34 +1518,35 @@
             }
 
             function generateCertificate() {
-                const nameInput = document.getElementById('user-name-input').value.trim();
-                if (!nameInput) {
-                    showToast("이름을 적어줘!");
-                    return;
-                }
+    const nameInput = document.getElementById('user-name-input').value.trim();
+    if (!nameInput) {
+        showToast("이름을 적어줘!");
+        return;
+    }
 
-                gtag('event', 'generate_certificate', { 'event_category': 'final_test' });
+    const nameEl = document.getElementById('final-cert-name');
+    nameEl.innerText = nameInput;
 
-                const nameEl = document.getElementById('final-cert-name');
-                nameEl.innerText = nameInput;
-                
-                // 이름 길이에 따른 글자 크기 동적 조절 (단, cqi단위 유지)
-                if (nameInput.length >= 5) {
-                    nameEl.style.fontSize = "4.5cqi";
-                } else if (nameInput.length >= 3) {
-                    nameEl.style.fontSize = "5.5cqi";
-                } else {
-                    nameEl.style.fontSize = "6cqi";
-                }
+    // 이름 길이에 따른 폰트 크기 조정 로직 (세 글자 기준)
+    const len = nameInput.length;
+    if (len <= 3) {
+        nameEl.style.fontSize = "6cqi"; // 세 글자까지는 크게
+    } else if (len <= 5) {
+        nameEl.style.fontSize = "5cqi"; // 4~5글자
+    } else if (len <= 8) {
+        nameEl.style.fontSize = "4cqi"; // 6~8글자
+    } else {
+        nameEl.style.fontSize = "3cqi"; // 8글자 이상
+    }
 
-                state.hasCertificate = true;
-                saveGame();
-                
-                switchTab('certificate');
-                setTimeout(() => {
-                    showSurveyModal();
-                }, 600);
-            }
+    state.hasCertificate = true;
+    saveGame();
+    
+    switchTab('certificate');
+    setTimeout(() => {
+        showSurveyModal();
+    }, 600);
+}
 
             function downloadCertificate() {
                 const certArea = document.getElementById('cert-capture-area');
