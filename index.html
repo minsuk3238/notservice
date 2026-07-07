@@ -1413,12 +1413,13 @@
                     const isCollected = state.collectedIds.includes(plant.id);
                     const slot = document.createElement('div');
                     
-                    if(isCollected) {
-                        slot.className = "stamp-slot collected";
-                        slot.style.backgroundImage = `url('${plant.comicImg}'), url('https://placehold.co/400x400/FFCC00/000?text=${plant.name}')`;
-                        slot.innerHTML = `<div class="stamp-mark" style="font-size: 1rem;">CLEAR</div>`;
-                        slot.onclick = () => showDetailModal(plant.id);
-                    } else {
+                   if(isCollected) {
+    slot.className = "stamp-slot collected";
+    // 👈 뒤에 겹쳐지던 더미 이미지 URL을 지우고 오직 식물 이미지만 깨끗하게 출력
+    slot.style.backgroundImage = `url('${plant.comicImg}')`;
+    slot.innerHTML = `<div class="stamp-mark" style="font-size: 1rem;">CLEAR</div>`;
+    slot.onclick = () => showDetailModal(plant.id);
+} else {
                         slot.className = "stamp-slot cursor-default";
                         slot.innerHTML = `
                             <i class="fa-solid fa-lock text-gray-400 text-xl mb-1"></i>
