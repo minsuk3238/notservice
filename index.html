@@ -406,7 +406,7 @@
 
         .cert-body {
             position: absolute;
-            top: calc(828 / 2754 * 100%);
+            top: calc(750 / 2754 * 100%); /* 기존 위치에서 위로 조정 */
             left: 50%;
             transform: translateX(-50%);
             color: #000;
@@ -418,8 +418,9 @@
 
         .cert-name-box {
             position: absolute;
-            top: calc(1122 / 2754 * 100%);
-            left: calc(554 / 1536 * 100%);
+            top: calc(500 / 2754 * 100%); /* 수료증 타이틀과 본문 중간 위치로 조정 */
+            left: calc(1200 / 1536 * 100%); /* X축 1200px 위치 지정 */
+            transform: translateX(-50%); /* 지정된 위치를 정중앙으로 맞춤 */
             color: #000;
             white-space: nowrap;
             font-size: 6cqi;
