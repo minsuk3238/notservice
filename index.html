@@ -53,7 +53,7 @@
       display: block;
     }
 
-    /* ⚠️ Tailwind가 색상을 덮어쓰지 못하도록 !important 적용 */
+    /* Tailwind가 색상을 덮어쓰지 못하도록 !important 적용 */
     #main-gateway-logo .logo-paint-green { fill: #2a9c39 !important; }
     #main-gateway-logo .logo-paint-white { fill: #ffffff !important; }
     #main-gateway-logo .logo-paint-blue { fill: #3691d0 !important; }
@@ -272,9 +272,10 @@
           ]
         );
       } else {
+        // 💡 영문 버전일 때 목적지 주소 뒤에 ?lang=en 결합
         openModal(
           'Garden Stamp Tour', 
-          'https://snoopy.jstamp.net/login', 
+          'https://snoopy.jstamp.net/login?lang=en', 
           '🐾', 
           '#008fd5', 
           'Press the footprint to stamp,<br>solve quizzes, and collect stamps.', 
@@ -305,9 +306,10 @@
           ]
         );
       } else {
+        // 💡 영문 버전일 때 목적지 주소 뒤에 ?lang=en 결합
         openModal(
           'Gardener Class: Tree Mission', 
-          'https://plantclass.vercel.app', 
+          'https://plantclass.vercel.app/?lang=en', 
           '🌿', 
           '#2c9942', 
           'Open the outdoor garden map<br>and find the glowing pins!<br>Read tree descriptions and solve quizzes!', 
