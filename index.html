@@ -1,352 +1,2110 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>2026 Summer Garden Camp</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    /* 1. 기본 스타일 리셋 */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>스누피가든 야외 도슨트 프리뷰</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
     
-    html {
-      scroll-behavior: smooth;
-    }
+    <!-- NanumSquare Font CDN for beautiful Korean typography -->
+    <link rel="stylesheet" href="https://cdn.tailwindcss.com/gh/moonspam/NanumSquare@2.0/nanumsquare.css" />
     
-    body {
-      width: 100vw;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background-color: #f7f9fc;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
+    <style>
+        /* --- CUSTOM FONTS INTEGRATION --- */
+        @font-face {
+            font-family: 'PeanutsSchulz';
+            src: url('Schulz.otf') format('opentype'),
+                 url('fonts/Schulz.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
 
-    /* 2. 첫 화면 (게이트웨이) 완전 가운데 정렬 */
-    .gateway-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 35px;
-      width: 100%;
-      height: 100vh;
-      max-width: 400px;
-      padding: 20px;
-    }
+        @font-face {
+            font-family: 'WoodstockTalk';
+            src: url('Woodstock Talk.otf') format('opentype'),
+                 url('fonts/Woodstock Talk.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
 
-    /* 3. 상단 메인 로고 스타일 및 Tailwind 충돌 방지 강제화 */
-    .logo-wrapper {
-      width: 100%;
-      max-width: 280px;
-      filter: drop-shadow(0px 8px 16px rgba(0, 0, 0, 0.06));
-    }
+        body {
+            font-family: 'PeanutsSchulz', 'NanumSquare', sans-serif;
+            background-color: #e2e8f0; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+        }
 
-    .logo-wrapper svg {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
+        .font-woodstock {
+            font-family: 'WoodstockTalk', sans-serif !important;
+        }
 
-    /* Tailwind가 색상을 덮어쓰지 못하도록 !important 적용 */
-    #main-gateway-logo .logo-paint-green { fill: #2a9c39 !important; }
-    #main-gateway-logo .logo-paint-white { fill: #ffffff !important; }
-    #main-gateway-logo .logo-paint-blue { fill: #3691d0 !important; }
-    #main-gateway-logo .logo-paint-yellow { fill: #f4f191 !important; }
+        #app-container {
+            width: 100%;
+            max-width: 414px; 
+            height: 100vh;
+            max-height: 896px;
+            background-color: #f8fafc;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
 
-    /* 4. 고정 텍스트 버튼 스타일 */
-    .button-group {
-      display: flex;
-      width: 100%;
-      gap: 16px;
-    }
+        @media (min-width: 415px) {
+            #app-container {
+                height: 90vh;
+                border-radius: 2rem;
+            }
+        }
 
-    .btn-text {
-      flex: 1;
-      padding: 16px 24px;
-      font-size: 16px;
-      font-weight: 600;
-      text-align: center;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    }
+        .page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f8fafc;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+        }
 
-    .btn-ko {
-      background-color: #2a9c39;
-      color: #ffffff;
-    }
-    .btn-ko:hover {
-      background-color: #227f2e;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(42, 156, 57, 0.2);
-    }
+        .page-hidden-right { transform: translateX(100%); opacity: 0; pointer-events: none; }
+        .page-hidden-left { transform: translateX(-100%); opacity: 0; pointer-events: none; }
+        .page-active { transform: translateX(0); opacity: 1; pointer-events: auto; }
 
-    .btn-en {
-      background-color: #ffffff;
-      color: #333333;
-      border: 1px solid #e2e8f0;
-    }
-    .btn-en:hover {
-      background-color: #f8fafc;
-      color: #000000;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
-    }
+        .story-content {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.8s ease-in-out, opacity 0.6s ease-in-out;
+        }
+        .story-content.revealed { max-height: 1000px; opacity: 1; }
 
-    .btn-text:active {
-      transform: translateY(0);
-    }
+        .scrollable-area::-webkit-scrollbar { width: 6px; }
+        .scrollable-area::-webkit-scrollbar-track { background: transparent; }
+        .scrollable-area::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
 
-    /* 5. 상세페이지 이미지 노출 영역 및 투명 링크 컨테이너 */
-    .page-view-section {
-      display: none;
-      position: relative;
-      width: 100%;
-      max-width: 500px;
-      background-color: #ffffff;
-      box-shadow: 0px 0px 20px rgba(0,0,0,0.05);
-    }
+        @keyframes pulse-soft {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .btn-interact { animation: pulse-soft 2s infinite; }
+        
+        /* Map Zoom Transition */
+        #map-zoom-wrapper {
+            transition: width 0.3s ease-out;
+        }
 
-    .page-view-section img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-
-    /* 6. 이미지 위에 얹어질 버튼 박스 */
-    .click-button {
-      position: absolute;
-      display: block;
-      background-color: rgba(255, 255, 255, 0) !important;
-      border: none !important;
-      cursor: pointer;
-      z-index: 10;
-    }
-
-    .link-left {
-      left: 26.8% !important;    
-      width: 19% !important;   
-      height: 0.9% !important;  
-    }
-
-    .link-right {
-      left: 54.3% !important;    
-      width: 19% !important;   
-      height: 0.9% !important;  
-    }
-
-    /* 번역 방어 핵심 스타일 */
-    .responsive-text { 
-        word-break: keep-all; 
-        overflow-wrap: break-word;
-    }
-  </style>
+        /* 펄싱 핀포인트 마커용 부드러운 애니메이션 정의 */
+        @keyframes map-pulse {
+            0% { r: 15px; opacity: 0.7; }
+            50% { r: 40px; opacity: 0.2; }
+            100% { r: 15px; opacity: 0.7; }
+        }
+        .map-pulse-effect {
+            animation: map-pulse 2s infinite ease-in-out;
+        }
+    </style>
 </head>
 <body>
 
-  <div class="gateway-container">
-    <div class="logo-wrapper">
-      <svg id="main-gateway-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 42 29.52">
-        <defs>
-          <style>
-            #main-gateway-logo .logo-paint-green { fill: #2a9c39 !important; }
-            #main-gateway-logo .logo-paint-white { fill: #fff !important; }
-            #main-gateway-logo .logo-paint-blue { fill: #3691d0 !important; }
-            #main-gateway-logo .logo-paint-yellow { fill: #f4f191 !important; }
-          </style>
-        </defs>
-        <path class="logo-paint-blue" d="M41.77,13.7l-1.99-1.94c.81-.77,1.2-1.51,1.2-2.25,0-.42-.14-1.04-.78-1.58-.42-.35-.98-.62-1.66-.8-.63-.16-1.32-.25-2.07-.25-.44,0-.92.03-1.42.1-.23.03-.42.16-.54.35-.14-.19-.36-.31-.62-.31h-1.91c.12-.09.24-.18.35-.28.45-.4.73-.9.85-1.47.02-.11.03-.24.03-.4,0-.54-.18-1.02-.54-1.44-.28-.32-.63-.59-1.04-.78.08-.02.15-.04.22-.05.3-.05.55-.27.63-.56.08-.3-.03-.61-.27-.8l-1.33-1.06c-.2-.16-.47-.21-.72-.13-.98.32-1.86.8-2.62,1.41-.18.14-.34.29-.49.45-.09-.21-.22-.42-.38-.61-.33-.39-.78-.7-1.34-.91-.52-.2-1.11-.31-1.73-.31-.97,0-1.94.25-2.87.75-.07.04-.14.09-.19.14-.29-.23-.61-.43-.97-.57-.53-.21-1.08-.32-1.64-.32-.61,0-1.2.13-1.74.38-.51.24-.95.58-1.29,1.01-.04-.05-.08-.11-.13-.16-.33-.39-.78-.7-1.34-.91-.52-.2-1.11-.31-1.73-.31-.97,0-1.94.25-2.87.75-.19.1-.33.28-.39.49-.05.21-.01.44.11.62l.8,1.18c.23.33.67.44,1.02.24.61-.35,1-.42,1.22-.42.11,0,.22.02.32.06.02.05.04.1.04.13,0,.02,0,.07-.07.15-.12.14-.28.27-.46.37-.23.14-.53.3-.89.48-.33.16-.58.29-.76.4-.3.17-.5.37-.62.6-.05.1-.08.2-.09.31l-.1,1.46s0,.08,0,.12h-1.1c-.2,0-.39.08-.53.21-.09-.08-.21-.14-.34-.17-.36-.08-.77-.15-1.22-.2-.45-.05-.91-.08-1.36-.08-1.44,0-2.5.29-3.24.9-.68.56-.82,1.16-.82,1.57,0,.49.18.96.54,1.4.19.23.4.45.64.64-.24.03-.47.17-.59.39l-.86,1.57c-.1.19-.12.42-.05.62.07.21.23.37.43.46.49.21,1.05.39,1.66.53.23.05.46.1.69.13-.19.15-.37.31-.54.5-.43.48-.7,1.05-.82,1.7-.07.42-.11.84-.11,1.26,0,.99.24,1.8.71,2.42.49.63,1.2,1.03,2.13,1.2.43.08.84.12,1.23.12.97,0,1.78-.24,2.43-.72.02.09.05.18.1.27.03.05.07.1.11.14-.15.11-.29.22-.41.35-.64.66-.96,1.57-.96,2.7,0,.18,0,.32.01.42.07,1.23.4,2.23.99,2.98.62.8,1.54,1.2,2.75,1.2.04,0,.08,0,.13,0,.84-.03,1.62-.29,2.31-.77.15-.1.29-.21.43-.33-.02.17.01.34.1.49.14.23.39.38.66.38h2.04c.34,0,.64-.22.74-.54l.46-1.48h.47s.44,1.39.44,1.39c.12.38.51.6.89.52l1.84-.39c.13.24.38.4.67.4h1.9c.43,0,.77-.35.77-.77v-.82s.04,0,.06,0l.99.03c.07,0,.14,0,.2-.02v1.02c0,.43.35.77.77.77h2.06c.19,0,.37-.07.51-.2.12.07.26.12.41.12h1.66c.41,0,.75-.33.77-.74l.06-1.56c.27-.1.57-.23.88-.39.57-.29,1.07-.64,1.49-1.06.52-.51.78-1.07.78-1.67s-.26-1.13-.78-1.6c-.12-.12-.26-.23-.42-.32.06-.02.12-.05.17-.09.13.09.28.14.45.14h1.86c.21,0,.41-.09.56-.24.07-.07.12-.15.16-.24l.02.05c.13.27.4.44.7.44h1.86c.21,0,.41-.08.55-.23.15-.15.22-.35.22-.56l-.17-6.22h1.11c.31,0,.6-.19.71-.48.12-.29.05-.62-.18-.84Z"/>
-        <path class="logo-paint-white" d="M41.59,13.88l-2.18-2.13c.89-.78,1.32-1.52,1.32-2.24,0-.53-.24-1.01-.69-1.39-.39-.33-.92-.58-1.56-.75-.61-.16-1.28-.24-2-.24-.43,0-.89.03-1.38.1-.25.03-.44.25-.44.51v.54h-.24v-.5c0-.28-.23-.51-.51-.51h-2.94c.45-.17.85-.41,1.2-.73.4-.36.66-.81.77-1.33.02-.09.03-.2.03-.35,0-.47-.16-.9-.48-1.27-.29-.34-.67-.6-1.12-.79-.13-.05-.26-.1-.4-.13.31-.18.6-.29.85-.33.2-.03.37-.18.42-.38.05-.2-.02-.41-.18-.53l-1.33-1.06c-.14-.11-.32-.14-.48-.09-.95.31-1.8.77-2.54,1.37-.29.24-.55.5-.76.77-.06-.35-.22-.67-.47-.96-.31-.36-.72-.64-1.24-.84-.49-.19-1.04-.29-1.64-.29-.93,0-1.86.24-2.75.72-.12.07-.21.18-.25.31-.32-.31-.69-.56-1.13-.73-.49-.2-1.01-.3-1.54-.3-.57,0-1.12.12-1.63.35-.53.24-.96.6-1.29,1.07,0,0,0,0,0,.01v.02s-.08.1-.11.15c-.08-.16-.18-.32-.31-.46-.31-.36-.72-.64-1.24-.84-.49-.19-1.04-.29-1.64-.29-.93,0-1.86.24-2.75.72-.13.07-.22.19-.26.33-.04.14,0,.29.07.41l.8,1.18c.15.22.45.29.68.16.53-.3.98-.46,1.34-.46.18,0,.35.04.5.11.07.12.11.23.11.33,0,.07-.01.18-.14.32-.14.16-.32.3-.52.42-.24.14-.54.31-.91.49-.32.16-.57.29-.74.39-.25.15-.42.31-.52.5-.03.06-.05.13-.06.21l-.1,1.46c0,.13.04.26.12.36h-1.47c-.27,0-.5.21-.51.48h-.02c-.02-.22-.17-.4-.4-.45-.35-.08-.75-.15-1.19-.2-.44-.05-.89-.08-1.33-.08-1.38,0-2.39.28-3.08.84-.48.4-.73.86-.73,1.38,0,.43.16.84.48,1.23.27.34.6.63.97.88.38.25.71.42,1.03.51.49.14.92.28,1.28.42-.06,0-.12,0-.19,0-.64,0-1.42-.24-2.33-.7-.25-.13-.55-.03-.68.21l-.86,1.57c-.07.13-.08.28-.04.41.05.14.15.25.28.31.47.2,1.02.38,1.62.51.47.11.94.17,1.4.2-.43.21-.8.5-1.12.85-.4.44-.65.97-.75,1.57-.07.4-.1.82-.1,1.22,0,.93.22,1.69.66,2.26.45.58,1.11.95,1.97,1.1.41.08.81.11,1.18.11,1.06,0,1.92-.3,2.56-.9.21-.19.38-.42.52-.68-.15.35-.27.6-.35.74-.09.16-.08.35.01.51.09.15.25.25.43.25-.3.15-.56.33-.77.55-.59.61-.89,1.46-.89,2.52,0,.18,0,.31,0,.41.07,1.18.38,2.13.93,2.84.57.73,1.42,1.1,2.54,1.1.04,0,.08,0,.12,0,.79-.03,1.52-.27,2.17-.72.54-.37,1-.82,1.37-1.33-.23.52-.39.88-.49,1.06-.09.16-.08.35.01.51.09.16.26.25.44.25h2.04c.22,0,.42-.15.49-.36l.52-1.66h.84s.5,1.57.5,1.57c.08.25.34.4.6.35l2.04-.43s.02,0,.03,0c.04.25.25.44.51.44h1.9c.28,0,.51-.23.51-.51v-1.2c.09.08.21.13.33.13l.99.03c.18,0,.35-.09.45-.24h0s0,1.49,0,1.49c0,.28.23.51.51.51h2.06c.14,0,.28-.06.37-.16.05-.05.08-.11.11-.17.09.15.25.25.44.25h1.66c.28,0,.5-.22.51-.49l.06-1.74c.31-.1.64-.24,1.02-.43.54-.27,1.02-.61,1.43-1.01.47-.46.7-.96.7-1.48s-.24-.99-.7-1.41c-.32-.31-.78-.55-1.36-.71h.84c.19,0,.36-.11.45-.26.09.16.25.26.45.26h1.86c.14,0,.28-.06.37-.16.1-.1.15-.24.14-.38l-.05-.8.5,1.05c.09.18.27.29.46.29h1.86c.14,0,.27-.06.37-.16s.15-.23.15-.37l-.17-6.4s0-.06-.01-.09h1.38c.21,0,.4-.13.48-.32.08-.19.03-.42-.12-.56ZM21.05,2.87h.06v.14l-.06-.14Z"/>
-        <g>
-          <path class="logo-paint-green" d="M14.53,6.94h-4.79l.1-1.46c.05-.1.16-.2.33-.29.17-.1.4-.22.71-.37.38-.19.7-.36.95-.51.25-.15.46-.32.64-.52.18-.2.27-.42.27-.66s-.09-.48-.27-.73c-.26-.16-.55-.24-.86-.24-.45,0-.99.17-1.6.52l-.8-1.18c.82-.44,1.66-.66,2.51-.66.53,0,1.01.08,1.45.25.44.17.78.4,1.03.69.25.29.38.62.38.98,0,.43-.18.86-.55,1.31-.37.45-.94.88-1.72,1.3l2.23.09v1.46Z"/>
-          <path class="logo-paint-green" d="M15.42,2.07l.02-.03c.28-.4.64-.7,1.09-.9.45-.2.92-.31,1.42-.31.47,0,.92.09,1.35.27.43.18.8.43,1.1.76.5.58.75,1.22.75,1.93,0,.55-.15,1.07-.44,1.58-.29.5-.69.91-1.18,1.21-.49.31-1.01.46-1.56.46-.15,0-.34-.02-.55-.06-.47-.08-.89-.28-1.28-.6s-.69-.72-.9-1.19c-.22-.47-.33-.96-.33-1.46,0-.63.17-1.19.52-1.67ZM17.7,2.4h-.03c-.26.05-.49.15-.69.3-.2.15-.36.34-.46.57-.11.22-.16.46-.16.69,0,.26.07.5.21.73.14.22.35.39.63.52.17.07.36.1.54.1.24,0,.47-.05.69-.15.22-.1.42-.24.58-.43.16-.18.26-.39.31-.62.04-.12.06-.25.06-.38,0-.24-.07-.46-.2-.67-.13-.21-.31-.38-.53-.5-.22-.12-.45-.18-.7-.18-.1,0-.18,0-.24.02Z"/>
-          <path class="logo-paint-green" d="M26.42,6.94h-4.79l.1-1.46c.05-.1.16-.2.33-.29.17-.1.4-.22.71-.37.38-.19.7-.36.95-.51.25-.15.46-.32.64-.52.18-.2.27-.42.27-.66s-.09-.48-.27-.73c-.26-.16-.55-.24-.86-.24-.45,0-.99.17-1.6.52l-.8-1.18c.82-.44,1.66-.66,2.51-.66.53,0,1.01.08,1.45.25.44.17.78.4,1.03.69.25.29.38.62.38.98,0,.43-.18.86-.55,1.31-.37.45-.94.88-1.72,1.3l2.23.09v1.46Z"/>
-          <path class="logo-paint-green" d="M29.98,3.05c.41,0,.8.08,1.18.23.38.15.69.37.92.64.24.28.35.59.35.94,0,.11,0,.19-.02.24-.08.41-.28.77-.61,1.06-.32.29-.7.51-1.12.66-.42.15-.81.22-1.17.22s-.74-.07-1.18-.22c-.43-.15-.82-.4-1.14-.76-.33-.36-.49-.83-.49-1.42,0-.19.02-.38.05-.59.15-.77.57-1.43,1.26-2,.69-.56,1.48-.99,2.37-1.28l1.33,1.06c-.34.05-.71.2-1.11.44-.4.24-.77.51-1.11.82.14-.02.3-.03.47-.03ZM30.65,5.34c.1-.13.15-.27.15-.41,0-.09-.02-.17-.05-.24-.06-.11-.18-.2-.36-.27-.17-.07-.35-.1-.52-.1-.05,0-.1,0-.16.02-.26.04-.48.12-.69.24-.2.12-.3.27-.3.47,0,.03.01.09.03.18.06.18.17.32.33.41.16.09.35.14.56.14.19,0,.38-.04.56-.11.19-.08.34-.19.44-.32Z"/>
-          <path class="logo-paint-green" d="M3.99,8.91c-.17,0-.3.02-.38.06-.08.04-.14.09-.19.17-.02.03-.03.07-.03.12,0,.17.17.36.5.58.33.22.89.44,1.66.68.51.15.9.38,1.19.7.29.32.43.68.43,1.06,0,.35-.13.68-.38.99-.25.31-.63.56-1.12.76-.49.18-1.05.27-1.68.27-.55,0-1.12-.07-1.69-.2-.57-.13-1.08-.29-1.53-.48l.86-1.57c.99.51,1.85.76,2.57.76.43,0,.76-.09.99-.27.07-.06.1-.13.1-.18,0-.17-.2-.33-.59-.5-.4-.16-.88-.32-1.45-.48-.26-.08-.55-.22-.88-.45-.33-.22-.62-.48-.86-.78-.24-.3-.36-.6-.36-.91,0-.36.18-.68.54-.98.59-.48,1.51-.73,2.75-.73.42,0,.84.02,1.27.07.43.05.8.11,1.14.19l-.32,1.51c-1.23-.27-2.08-.4-2.52-.4Z"/>
-          <path class="logo-paint-green" d="M7.88,12.01v-4.23h1.66v3.92s.02.12.07.22c.05.1.14.19.28.28.14.08.33.13.57.13.08,0,.16-.01.24-.02.27-.03.45-.19.53-.48.09-.29.13-.58.13-.86v-3.19h1.85c0,1.26-.05,2.33-.14,3.19-.09.86-.35,1.62-.76,2.28-.42.66-1.07.99-1.96.99-.35,0-.73-.06-1.14-.17-.21-.05-.41-.17-.62-.34-.2-.17-.37-.41-.51-.7-.14-.29-.21-.64-.21-1.03Z"/>
-          <path class="logo-paint-green" d="M14.11,14.03v-6.13l2.25.03.95,2.45,1.23-2.45h1.94l.38,6.32h-2.06v-3.3l-.95,1.54-.99-.03-.86-1.21v2.79h-1.9Z"/>
-          <path class="logo-paint-green" d="M21.8,14.03v-6.13l2.25.03.95,2.45,1.23-2.45h1.94l.38,6.32h-2.06v-3.3l-.95,1.54-.99-.03-.86-1.21v2.79h-1.9Z"/>
-          <path class="logo-paint-green" d="M29.48,7.78h4.41v1.55h-2.75v.93h2.56v1.35h-2.56v.75h3.11v1.7h-4.77v-6.28Z"/>
-          <path class="logo-paint-green" d="M35.16,14.25v-6.51c.47-.06.9-.1,1.31-.1.68,0,1.31.07,1.87.22.57.15,1.02.36,1.36.65.34.28.51.61.51.99,0,.66-.52,1.4-1.57,2.21l2.59,2.53h-2.27c-.37-.36-.73-.69-1.06-.97-.33-.29-.58-.47-.74-.54v1.51h-2ZM37.16,9.24v1.45c.37-.09.67-.22.9-.39.23-.17.35-.35.35-.52,0-.16-.1-.29-.31-.39-.21-.1-.52-.15-.93-.15Z"/>
-          <path class="logo-paint-green" d="M8.27,16.65l-1.82.46s-.05-.07-.09-.18c-.04-.11-.1-.21-.17-.29-.07-.09-.17-.15-.31-.2-.23-.08-.43-.12-.6-.12-.29,0-.53.08-.75.25-.21.17-.37.39-.48.66-.11.27-.17.56-.17.87,0,.33.06.63.19.93.13.29.31.53.57.7.25.18.56.27.92.27.29,0,.54-.07.75-.2.22-.13.31-.34.3-.63l-1.2-.2.26-1.25,2.76.11c.01.21.02.36.02.45,0,1.05-.27,1.84-.82,2.35-.54.51-1.28.76-2.21.76-.34,0-.71-.03-1.09-.1-.74-.13-1.29-.44-1.66-.91-.37-.47-.55-1.12-.55-1.94,0-.38.03-.76.1-1.14.09-.51.3-.94.63-1.31.33-.37.73-.65,1.21-.84s.96-.29,1.47-.29c.63,0,1.2.15,1.71.46.5.31.85.75,1.04,1.33Z"/>
-          <path class="logo-paint-green" d="M13.49,21.23l-.61-1.93h-1.6s-.63,2.03-.63,2.03h-2.04c.17-.31.5-1.08,1-2.29.5-1.21,1.05-2.58,1.65-4.11l1.72.1,2.53,5.78-2.04.43ZM12.03,16.65l-.55,1.61,1.14.03-.59-1.63Z"/>
-          <path class="logo-paint-green" d="M16.17,21.44v-6.51c.47-.06.9-.1,1.31-.1.68,0,1.31.07,1.87.22.57.15,1.02.36,1.36.65.34.28.51.61.51.99,0,.66-.52,1.4-1.57,2.21l2.59,2.53h-2.27c-.37-.36-.73-.69-1.06-.97-.33-.29-.58-.47-.74-.54v1.51h-2ZM18.17,16.44v1.45c.37-.09.67-.22.9-.39.23-.17.35-.35.35-.52,0-.16-.1-.29-.31-.39-.21-.1-.52-.15-.93-.15Z"/>
-          <path class="logo-paint-green" d="M27.64,17.17c.22.42.32.84.32,1.26,0,.53-.18,1.01-.53,1.45-.35.44-.9.79-1.63,1.06-.74.27-1.65.4-2.75.4h-.31l-.03-6.46c.66.02,1.27.09,1.83.21.55.13,1.02.27,1.39.44.37.17.64.32.8.48.4.36.7.74.92,1.17ZM26.38,18.17c0-.2-.1-.4-.31-.58-.21-.18-.47-.33-.78-.46-.31-.13-.61-.22-.92-.28l.07,2.52c.49-.1.92-.25,1.28-.43.37-.18.58-.39.63-.62.02-.05.03-.1.03-.16Z"/>
-          <path class="logo-paint-green" d="M28.71,14.98h4.41v1.55h-2.75v.93h2.56v1.35h-2.56v.75h3.11v1.7h-4.77v-6.28Z"/>
-          <path class="logo-paint-green" d="M34.37,21.26v-6.21l2.04.09,1.29,3.35v-3.62h1.65l.17,6.4h-1.86l-1.62-3.41.19,3.41h-1.86Z"/>
-          <path class="logo-paint-green" d="M11.23,23.98c-.22-.18-.47-.28-.75-.28-.12,0-.25.01-.41.04-.3.08-.52.3-.64.66-.12.36-.18.71-.18,1.07,0,.19.04.4.13.62.09.22.24.42.45.59.21.17.49.25.83.25.37,0,.7-.09,1-.26.3-.17.55-.38.73-.63l1.45.66c-.36.55-.83,1.03-1.4,1.42-.57.4-1.21.61-1.9.63-1.01.02-1.75-.28-2.24-.9-.49-.63-.76-1.48-.83-2.56,0-.09,0-.21,0-.38,0-.93.25-1.65.74-2.17.49-.51,1.3-.8,2.43-.85h.18c.51,0,.96.12,1.35.37.38.25.7.58.94.98.24.4.42.84.53,1.31l-1.84.36c-.16-.45-.34-.76-.56-.95Z"/>
-          <path class="logo-paint-green" d="M18.95,28.43l-.61-1.93h-1.6s-.63,2.03-.63,2.03h-2.04c.17-.31.5-1.08,1-2.29.5-1.21,1.05-2.58,1.65-4.11l1.72.1,2.53,5.78-2.04.43ZM17.49,23.85l-.55,1.61,1.14.03-.59-1.63Z"/>
-          <path class="logo-paint-green" d="M21.63,28.42v-6.13l2.25.03.95,2.45,1.23-2.45h1.94l.38,6.32h-2.06v-3.3l-.95,1.54-.99-.03-.86-1.21v2.79h-1.9Z"/>
-          <path class="logo-paint-green" d="M29.31,28.55v-6.18c.19-.1.42-.18.69-.24.28-.06.58-.08.9-.08.54,0,1.07.07,1.58.21.51.14.9.34,1.16.6.36.33.54.67.54,1.04s-.18.76-.55,1.12c-.37.36-.8.67-1.3.92-.5.25-.93.42-1.29.5l-.08,2.11h-1.66ZM32.45,23.73l-1.29-.33v1.75c.12,0,.31-.06.55-.17.24-.11.46-.25.65-.41.19-.16.28-.33.28-.49,0-.13-.06-.25-.19-.34Z"/>
-        </g>
-        <g>
-          <path class="logo-paint-yellow" d="M17.77,2.2h-.04c-.29.05-.54.16-.76.33-.22.17-.39.38-.51.62-.12.25-.18.5-.18.76,0,.29.08.55.23.8.15.24.38.43.69.57.19.08.39.11.59.11.26,0,.52-.06.76-.17.25-.11.46-.27.63-.47.18-.2.29-.43.34-.68.04-.13.07-.27.07-.41,0-.26-.07-.51-.22-.74-.15-.23-.34-.41-.58-.55-.24-.13-.5-.2-.77-.2-.11,0-.2,0-.26.02Z"/>
-          <polygon class="logo-paint-yellow" points="17.57 1.26 17.66 1.98 17.95 1.98 17.89 1.26 17.57 1.26"/>
-          <polygon class="logo-paint-yellow" points="18.91 1.5 18.64 2.07 18.88 2.19 19.29 1.73 18.91 1.5"/>
-          <polygon class="logo-paint-yellow" points="17.27 5.64 17.06 6.26 17.55 6.32 17.62 5.8 17.27 5.64"/>
-          <polygon class="logo-paint-yellow" points="18.36 5.61 18.79 5.39 19.18 6.28 18.8 6.44 18.36 5.61"/>
-          <polygon class="logo-paint-yellow" points="19.83 3.63 19.75 4.03 20.56 4.18 20.66 3.47 19.83 3.63"/>
-          <polygon class="logo-paint-yellow" points="16.17 3.01 15.4 2.88 15.3 3.39 16.06 3.47 16.17 3.01"/>
-          <polygon class="logo-paint-yellow" points="16.65 2.46 16.87 2.32 16.65 1.67 16.28 1.87 16.65 2.46"/>
-          <polygon class="logo-paint-yellow" points="16.05 4.08 15.41 4.25 15.56 4.78 16.17 4.56 16.05 4.08"/>
-          <polygon class="logo-paint-yellow" points="19.38 2.62 20.03 2.2 20.19 2.72 19.64 2.88 19.38 2.62"/>
-          <polygon class="logo-paint-yellow" points="16.48 5.11 15.87 5.54 16.38 5.91 16.69 5.28 16.48 5.11"/>
-          <polygon class="logo-paint-yellow" points="19.51 4.77 20.35 5.17 20.07 5.71 19.38 5.03 19.51 4.77"/>
-        </g>
-      </svg>
-    </div>
+<script>
+    const tourData = [
+        {
+            id: 1,
+            title: "소설왕 스누피 광장",
+            subtitle: "위대한 작가를 꿈꾸는 시간",
+            imageName: "spot1_writer.png",
+            color: "#f8c9c9",
+            text: "어두운 폭풍우 치는 밤이었다<br>(It was a dark and stormy night...)<br><br>어디선가 타자기 소리가 들리시나요? 이곳은 위대한 소설가를 꿈꾸는 스누피의 작업실입니다. 스누피는 개집 지붕 위에 앉아 타자기를 두드리며 매일같이 엄청난 열정으로 소설을 씁니다. 하지만 현실은 냉혹하죠. 출판사로부터 돌아오는 건 항상 <br>\"귀하의 원고를 반려합니다\"라는 정중하고도 단호한 거절 편지들뿐입니다.<br><br>때로는 강아지가 썼다는 이유로, 때로는 내용이 터무니없다는 이유로 매번 거절당하지만 스누피는 절대 타자기를 놓지 않습니다. 수많은 거절 속에서도 굴하지 않고 계속해서 상상의 나래를 펼치는 스누피의 꺾이지 않는 마음을 만나보세요."
+        },
+        {
+            id: 2,
+            title: "비글 스카우트 캠프",
+            subtitle: "좌충우돌 자연 탐험",
+            imageName: "spot2_beagle.png",
+            color: "#e4edb7",
+            text: "\"자, 대원들! 나를 따르라!\"<br><br>자랑스러운 비글 스카우트의 대장 스누피가 우드스탁과 작은 새 친구들을 이끌고 숲속 탐험에 나섰습니다. 나침반을 거꾸로 보거나, 텐트 하나 제대로 치지 못해 쩔쩔매고, 툭하면 길을 잃어버리는 오합지졸 부대지만 이들의 캠핑은 언제나 즐겁습니다.<br><br>왜냐고요? 모닥불에 노릇노릇하게 구워 먹는 달콤한 마시멜로가 있기 때문이죠! 좌충우돌 자연 탐험 속에서도 낭만을 잃지 않는 비글 스카우트의 캠프에 오신 것을 환영합니다."
+        },
+        {
+            id: 3,
+            title: "피너츠 사색 들판",
+            subtitle: "벽돌 담장 앞의 꼬마 철학자들",
+            imageName: "spot3_thought.png",
+            color: "#f8c9c9",
+            text: "피너츠 코믹 스트립을 유심히 보셨다면, 아이들이 벽돌 담장에 기대어 서 있는 컷을 자주 보셨을 겁니다.<br>찰리 브라운과 라이너스는 이곳에서 인생의 무게, 짝사랑의 아픔, 학교생활의 고단함 같은 아주 철학적이고 진지한 고민을 나눕니다.<br><br>그 옆에서는 턱을 괸 마시와 페퍼민트 패티가 엉뚱하지만 예리한 대화를 주고받죠. <br>\"어제는 지나갔고 내일은 알 수 없지만, 오늘은 선물이다.\" 어린아이들이지만 이 담장 앞에서 나누는 대화는 때론 어른들보다 더 깊은 울림과 위로를 줍니다."
+        },
+        {
+            id: 4,
+            title: "찰리 브라운의 야구장",
+            subtitle: "위대한 0점의 행진",
+            imageName: "spot4_baseball.png",
+            color: "#40b049",
+            text: "이곳은 세계에서 가장 운이 없는 야구팀의 홈구장입니다. 매니저이자 투수인 찰리 브라운은 언제나 비장하게 마운드에 오르지만, 결과는 늘 참담합니다.<br><br>옆에 있는 점수판을 보세요. 상대 팀 점수는 까마득하게 높은데, 찰리 브라운의 팀은 영원한 '0점'입니다.<br>게다가 저기 보이는 '연 먹는 나무(Kite-Eating Tree)'는 찰리 브라운이 공들여 날리는 연을 족족 집어삼키며 그의 불운에 쐐기를 박죠.<br><br>하지만 찰리 브라운의 진짜 위대한 점은 무엇일까요? 오늘 처참하게 졌어도, 내일 또다시 묵묵히 글러브를 끼고 마운드에 오른다는 것입니다."
+        },
+        {
+            id: 5,
+            title: "피너츠 컬러 가든",
+            subtitle: "다채로운 색깔의 사랑 이야기",
+            imageName: "spot5_color.png",
+            color: "#f8c9c9",
+            text: "피너츠 친구들의 마음속에는 각자의 색깔을 띤 사랑과 우정의 이야기가 자라고 있습니다.<br><br>라이너스를 '마이 스윗 바부(My Sweet Babboo)'라 부르며 맹목적인 애정을 퍼붓는 <b>샐리 브라운의 핑크 가든</b>, 찰리 브라운을 남몰래 짝사랑하는 왈가닥 <b>페퍼민트 패티의 그린 가든</b>, 짝사랑하는 빨간 머리 소녀에게 줄 러브레터를 쥐고 고민하는 <b>찰리 브라운의 러브레터 옐로우 가든</b>, 그리고 그가 동경하는 <b>빨간 머리 소녀의 발렌타인 레드 가든</b>, 마지막으로 언제나 라이너스에게 평온함을 주는 애착 담요<b>라이너스의 담요 블루 가든</b>까지.<br><br>엇갈리기도 하고 서툴기도 한, 다채로운 색깔의 사랑 이야기들이 이곳에 피어나고 있습니다."
+        },
+        {
+            id: 6,
+            title: "스누피 페르소나 암석원",
+            subtitle: "무한한 상상력의 진화",
+            imageName: "spot6_persona.png",
+            color: "#e4e0d2",
+            text: "스누피는 평범한 강아지로 남기를 거부했습니다. 마스크를 쓴 팔씨름 챔피언 '마스크 마블',<br>붉은 남작과 공중전을 벌이는 1차 세계대전 '플라잉 에이스',<br>캠퍼스를 누비는 멋쟁이 대학생 '조 쿨',<br>최초로 달에 간 '우주비행사',<br>그리고 늠름한 프랑스 외인부대 '보'까지! 스누피의 상상력은 시공간을 초월합니다.<br><br>이곳에서는 스누피의 무한한 페르소나들뿐만 아니라, 1950년대 네 발로 걷던 평범한 강아지가<br>60~70년대를 거쳐 직립보행을 하고,<br>80~90년대 우리가 아는 능글맞은 표정의 스누피로 진화해 온 작화의 역사도 함께 만날 수 있습니다."
+        },
+        {
+            id: 7,
+            title: "호박대왕의 호박밭",
+            subtitle: "보이지 않는 것을 믿는 마음",
+            imageName: "spot7_pumpkin.png",
+            color: "#fadcc7",
+            text: "모두가 유령 분장을 하고 사탕을 얻으러 가는 왁자지껄한 할로윈 밤.<br>오직 라이너스만이 캄캄한 호박밭에 남아 '호박대왕(Great Pumpkin)'을 기다립니다. 호박대왕은 가장 진실한 호박밭에 나타나 장난감을 나눠준다고 굳게 믿기 때문이죠.<br><br>샐리는 라이너스를 좋아해서 따라 남았다가 밤새 허탕을 치고 화를 내고, 스누피는 몰래 숨어있다 튀어나와 아이들을 기절초풍하게 놀래킵니다. 매년 호박대왕을 만나지 못하고 실패하면서도, 보이지 않는 것을 향한 라이너스의 순수한 믿음은 절대 꺾이지 않습니다."
+        },
+        {
+            id: 8,
+            title: "라이너스의 담요 숲",
+            subtitle: "가장 완벽한 마음의 안식처",
+            imageName: "spot8_blanket.png",
+            color: "#d0ebf8",
+            text: "라이너스의 한 손에는 언제나 낡은 하늘색 애착 담요가 들려 있습니다. 스누피가 장난치며 뺏어서 도망가기도 하고, 누나 루시가 꼴 보기 싫다며 몰래 땅에 묻어버리기도 하지만, 라이너스에게 이 담요는 절대적인 안정감과 지혜의 원천입니다.<br><br>담요를 얼굴에 비비고 엄지손가락을 빠는 순간, 라이너스는 세상에서 가장 평온한 철학자가 됩니다. 불안한 현대인들에게 '안전 기지'라는 심리학적 개념을 대중화시킨 이 애착 담요의 포근함을 숲 속에서 느껴보세요."
+        },
+        {
+            id: 9,
+            title: "우드스탁의 빅 네스트",
+            subtitle: "내 말을 온전히 알아주는 친구",
+            imageName: "spot9_nest.png",
+            color: "#fbf2c0",
+            text: "철새인데도 날아다니는 게 서툴고 고소공포증까지 있는 작고 노란 새, 우드스탁입니다. 재미있는 사실은 코믹 스트립에서 우드스탁의 말은 항상 길쭉한 빗금(<span class='font-woodstock text-xl px-1 font-bold text-amber-600'>snoopy</span>)들로만 표현된다는 것입니다. <br><br>우리 눈에는 그저 낙서 같지만, 놀랍게도 스누피는 이 작은 새의 기쁨, 슬픔, 불평을 완벽하게 알아듣고 대화를 나눕니다. 세상에 내 말을 온전히 알아주는 단 한 명의 친구가 있다는 것, 그것이 우드스탁이 엉성한 둥지 위에서도 늘 행복하게 지저ꈰ 수 있는 이유입니다."
+        },
+        {
+            id: 10,
+            title: "웜 퍼피 레이크",
+            subtitle: "행복은 포근한 강아지",
+            imageName: "spot10_lake.png",
+            color: "#d6ebdc",
+            text: "\"내 곁에 남아 있는 건 너뿐이야<br>(You're the only one who stays with me)\"<br><br>찰리 브라운은 야구 경기에서 지고, 좋아하는 여자아이에게 말도 못 걸고, 친구들에게 놀림을 받는 우울한 하루를 보냅니다. 하지만 해 질 녘 호숫가 나루터에 고개를 숙이고 앉아 있을 때, 그의 곁에는 항상 스누피가 조용히 다가와 함께해 줍니다.<br><br>백 마디 위로의 말보다 그저 내 옆에 체온을 나누며 나란히 앉아주는 작은 강아지. <br>\"행복은 포근한 강아지\"라는 피너츠의 가장 아름답고 유명한 명언이 탄생한 찰리 브라운과 스누피의 위대한 우정 이야기입니다."
+        },
+        {
+            id: 11,
+            title: "루시의 가드닝 스쿨",
+            subtitle: "보스 루시의 숨겨진 다정함",
+            imageName: "spot11_gardening.png",
+            color: "#e0c9e1",
+            text: "평소엔 친구들에게 대장 노릇을 하고 툴툴거리기 바쁜 보스 기질의 루시지만, 자연 앞에서는 조금 다릅니다. 코믹 스트립에서 루시는 종종 화단에 물을 주며 식물들과 진지한 대화를 나눕니다.<br><br>(물론 가끔은 씨앗을 향해 \"빨리빨리 자라지 못해!\"라고 윽박지르기도 하지만요!) 루시에게 가드닝은 단순히 식물을 키우는 것을 넘어, 생명을 돌보고 자연과 교감하는 그녀만의 숨겨진 부드러운 방식입니다."
+        }
+    ];
 
-    <div class="button-group">
-      <button onclick="loadPage('ko')" class="btn-text btn-ko">한글</button>
-      <button onclick="loadPage('en')" class="btn-text btn-en">ENGLISH</button>
-    </div>
-  </div>
+    // --- 최종 구축될 세로형 지도 절대 규격 상수 설정 (1500 x 2400) ---
+    const MAP_WIDTH = 1500;
+    const MAP_HEIGHT = 2400;
 
-  <div id="pageView" class="page-view-section">
-    <img id="pageImage" src="" alt="상세페이지">
+    // --- [수정] 사용자가 제공한 스팟 11개 전체의 정밀 조정 오프셋 리스트 적용 ---
+    let mapOffsets = [
+        { x: 435.0, y: 891.0 },   // 0: Spot 1 (소설왕 스누피 광장)
+        { x: 413.0, y: 731.0 },   // 1: Spot 2 (비글 스카우트 캠프)
+        { x: 463.0, y: 493.0 },   // 2: Spot 3 (피너츠 사색 들판)
+        { x: 655.0, y: 647.0 },   // 3: Spot 4 (찰리 브라운의 야구장)
+        { x: 845.0, y: 632.0 },   // 4: Spot 5 (피너츠 컬러 가든)
+        { x: 955.0, y: 319.0 },   // 5: Spot 6 (스누피 페르소나 암석원)
+        { x: 1146.0, y: 229.0 },  // 6: Spot 7 (호박대왕의 호박밭)
+        { x: 1181.0, y: 648.0 },  // 7: Spot 8 (라이너스의 담요 숲)
+        { x: 1205.0, y: 461.0 },  // 8: Spot 9 (우드스탁의 빅 네스트)
+        { x: 962.0, y: 777.0 },   // 9: Spot 10 (웜 퍼피 레이크)
+        { x: 853.0, y: 1064.0 }   // 10: Spot 11 (루시의 가드닝 스쿨)
+    ];
+
+    // --- 각 노선의 최종 끝나는 마커 핀포인트 생성용 로컬 좌표쌍 목록 ---
+    const rawMapPaths = [
+        /* 0: Spot 1 */ "2.75 106.5 45.05 58.8 44.15 19.2 36.5 7.5 22.1 2.1 .05 1.2",
+        /* 1: Spot 2 */ "16.52 158.51 4.52 143.21 1.22 128.21 7.82 86.51 15.32 79.31 96.62 76.91 114.32 65.81 118.82 52.91 116.42 39.41 108.32 28.31 89.72 17.81 84.62 9.41 87.92 .41",
+        /* 2: Spot 3 */ "40.84 234.62 56.44 221.72 66.64 216.92 73.54 195.32 70.84 186.32 49.84 163.52 5.44 127.22 1.24 112.22 3.64 103.22 45.04 60.02 68.44 54.62 78.94 59.42 81.64 65.12 82.54 79.82 91.24 93.32 98.74 98.42 144.64 104.12 225.94 63.62 245.74 63.92 271.54 43.22 293.44 31.52 321.04 2.12 329.14 1.22 358.84 10.82 365.44 24.62 353.14 62.12 343.84 72.32 325.84 78.62 320.14 84.92 318.94 112.22 314.14 120.62 306.64 126.32 285.34 128.42 277.84 141.02 273.94 154.22",
+        /* 3: Spot 4 */ "82.21 .86 71.41 11.36 41.71 36.26 12.91 77.36 6.31 91.46 1.21 111.26 1.81 127.76 17.41 197.36 63.91 236.36 128.71 261.26 161.41 260.06 177.31 251.36 186.61 237.26",
+        /* 4: Spot 5 */ "1.07 251.51 84.47 89.81 150.17 .71",
+        /* 5: Spot 6 */ "41.19 311.68 56.79 286.78 4.59 239.98 1.29 226.18 6.09 219.28 65.49 151.48 72.39 151.48 82.89 166.18 82.89 185.08 76.59 211.48 81.39 225.28 118.29 229.18 129.69 216.58 104.19 90.28 133.89 40.78 157.89 28.48 187.59 .88",
+        /* 6: Spot 7 */ "M.24,91.66 l18 -3.6 28.5 21.9 9.6 44.4 20.7 24.9 9 -.3 66 -19.5 5.4 -8.4 3.9 -14.1 -11.1 -51 -7.2 -5.4 -28.5 -10.5 -14.1 -34.2 5.7 -11.4 19.5 -8.7 22.2 .9 5.4 -4.2 7.8 -11.1 21.9 5.4 2.4 7.8 -.6 5.1 6.6 4.5 -17.1 15 13.8 4.8 -13.8 13.2 13.8 10.5 -11.7 8.4 14.1 10.5 -.6 3.3 -8.4 6.9 8.4 34.2 -11.1 28.8 -141.6 47.7 -6.9 43.8 6.6 87.6 l-11.7 54",
+        /* 7: Spot 8 */ ".36 1.15 81.66 26.35 118.26 27.25",
+        /* 8: Spot 9 */ "97.05 215 103.95 207.2 118.35 127.7 121.35 46.7 126.45 7.4 136.35 1.4 145.05 6.5 146.25 20.9 143.55 98.9 144.15 120.2 151.35 139.1 138.45 229.7 148.95 265.1 120.15 341.9 98.25 439.7 9.45 469.1 .45 465.5",
+        /* 9: Spot 10*/ "241.5 147.94 260.7 72.64 258.3 64.24 217.5 8.14 208.5 4.24 147 1.24 118.8 53.74 121.5 57.34 154.2 58.54 158.1 63.34 157.2 68.44 149.7 74.44 133.8 79.84 107.1 75.04 95.1 66.34 18 82.24 5.7 90.64 1.2 102.04 1.2 139.24 36.9 170.14 44.7 193.84 51.6 205.54 72 224.74 111 232.54 113.1 238.24 111.9 281.74 112.8 286.84",
+        /* 10: Spot 11*/"223.92 1.12 262.62 16.42 307.32 5.92 389.52 67.12 412.32 135.52 241.92 185.02 163.32 158.32 137.52 155.62 68.22 161.92 1.32 127.42 4.02 109.72"
+    ];
+</script>
+
+<div id="app-container">
     
-    <button id="leftOverlayLink" onclick="clickLeftButton()" class="click-button link-left"></button>
-    <button id="rightOverlayLink" onclick="clickRightButton()" class="click-button link-right"></button>
-  </div>
-
-  <div id="modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-      <div class="bg-white rounded-3xl p-6 md:p-8 max-w-sm w-full shadow-2xl relative">
-          <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
-          <div id="modal-icon" class="w-16 h-16 md:w-20 md:h-20 mx-auto rounded-full flex items-center justify-center mb-6 text-4xl md:text-5xl"></div>
-          <h3 id="modal-title" class="text-xl md:text-2xl font-bold text-center mb-4 text-[#040000]"></h3>
-          <p id="modal-desc" class="text-slate-600 text-center text-xs md:text-sm mb-6 italic leading-relaxed"></p>
-          <div id="modal-content" class="text-slate-700 mb-8 space-y-4 text-xs md:text-sm bg-slate-50 p-4 md:p-6 rounded-2xl"></div>
-          <a id="modal-link" href="#" target="_blank" class="block w-full text-center text-white py-3 md:py-4 rounded-xl font-bold hover:opacity-90 transition-opacity">바로가기</a>
-      </div>
-  </div>
-
-  <script>
-    let currentLang = 'ko';
-
-    function loadPage(lang) {
-      currentLang = lang;
-      const viewSection = document.getElementById('pageView');
-      const imgTarget = document.getElementById('pageImage');
-      const leftLink = document.getElementById('leftOverlayLink');
-      const rightLink = document.getElementById('rightOverlayLink');
-      
-      if (lang === 'ko') {
-        imgTarget.src = '국문_모바일-상세페이지.png';
-        leftLink.style.top = '15.5%';
-        rightLink.style.top = '15.5%';
-      } else if (lang === 'en') {
-        imgTarget.src = '영문_모바일-상세페이지.png';
-        leftLink.style.top = '15.3%';
-        rightLink.style.top = '15.3%';
-      }
-      
-      viewSection.style.display = 'block';
-      
-      setTimeout(() => {
-        viewSection.scrollIntoView({ behavior: 'smooth' });
-      }, 50);
-    }
-
-    // 왼쪽 버튼 (가든 스탬프 투어) 데이터 매핑
-    function clickLeftButton() {
-      if (currentLang === 'ko') {
-        openModal(
-          '가든 스탬프 투어', 
-          'https://snoopy.jstamp.net/login', 
-          '🐾', 
-          '#008fd5', 
-          '발바닥 모양을 눌러 스탬프를 찍고,<br>퀴즈를 풀어 스탬프를 모아보세요.', 
-          [
-            '카카오톡, Google, Apple 계정으로 로그인합니다.', 
-            '스탬프 투어 메뉴를 클릭하세요.', 
-            '발바닥 아이콘을 누르고, 가든 곳곳에 비치된 스탬프를 찍어보세요.', 
-            '스탬프 8개를 모두 모으면, 스토어에서 소정의 기념품을 받을 수 있습니다.'
-          ]
-        );
-      } else {
-        // 💡 영문 버전일 때 목적지 주소 뒤에 ?lang=en 결합
-        openModal(
-          'Garden Stamp Tour', 
-          'https://snoopy.jstamp.net/login?lang=en', 
-          '🐾', 
-          '#008fd5', 
-          'Press the footprint to stamp,<br>solve quizzes, and collect stamps.', 
-          [
-            'Log in with Kakao, Google, or Apple accounts.', 
-            'Click on the Stamp Tour menu.', 
-            'Press the footprint icon and stamp at designated spots throughout the garden.', 
-            'Collect all 8 stamps to get a small souvenir at the store.'
-          ]
-        );
-      }
-    }
-
-    // 오른쪽 버튼 (가드너 클래스) 데이터 매핑
-    function clickRightButton() {
-      if (currentLang === 'ko') {
-        openModal(
-          '가드너 클래스: 나무 찾기 미션', 
-          'https://plantclass.vercel.app', 
-          '🌿', 
-          '#2c9942', 
-          '야외 가든 지도를 열고<br>반짝이는 핀을 찾아가세요!<br>나무 설명을 읽고 퀴즈를 풀어보세요!', 
-          [
-            '지도에 표시된 핀을 순서대로 따라가 보세요.', 
-            '각 나무에 해당하는 퀴즈를 모두 풀어보세요.', 
-            '최종 테스트를 완료하고 디지털 인증서를 받아보세요!', 
-            '설문 완료 화면을 매표소에 제시하면 소정의 리워드를 수령할 수 있습니다.'
-          ]
-        );
-      } else {
-        // 💡 영문 버전일 때 목적지 주소 뒤에 ?lang=en 결합
-        openModal(
-          'Gardener Class: Tree Mission', 
-          'https://plantclass.vercel.app/?lang=en', 
-          '🌿', 
-          '#2c9942', 
-          'Open the outdoor garden map<br>and find the glowing pins!<br>Read tree descriptions and solve quizzes!', 
-          [
-            'Follow the pins on the map in sequence.', 
-            'Solve all the quizzes for each tree.', 
-            'Complete the final test to receive a digital certificate!', 
-            'Present the survey completion screen at the ticket office to get a reward.'
-          ]
-        );
-      }
-    }
-
-    // 공용 모달 데이터 적용 및 노출
-    function openModal(title, url, icon, color, desc, steps) {
-        const modal = document.getElementById('modal');
-        document.getElementById('modal-title').innerText = title;
-        document.getElementById('modal-desc').innerHTML = desc;
-        document.getElementById('modal-link').href = url;
-        document.getElementById('modal-icon').innerText = icon;
-        document.getElementById('modal-content').innerHTML = steps.map((step, index) => `
-            <div class="flex items-start gap-3">
-                <span class="flex-shrink-0 font-extrabold text-[10px] md:text-xs px-2 py-1 rounded-md bg-slate-200 text-slate-600">Step ${index + 1}</span>
-                <span class="leading-relaxed break-keep text-slate-700 responsive-text">${step}</span>
+    <!-- PAGE 1: Home/List View -->
+    <div id="home-page" class="page page-active">
+        <!-- Header -->
+        <header class="bg-white px-6 py-5 shadow-sm z-20 sticky top-0 flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-bold text-gray-800">스누피가든 에피소드 탐구</h1>
+                <p class="text-sm text-gray-500 mt-1">피너츠 코믹 스트립 속으로 떠나는 에피소드</p>
             </div>
-        `).join('');
-        
-        const iconEl = document.getElementById('modal-icon');
-        iconEl.style.backgroundColor = color + '15';
-        iconEl.style.color = color;
-        document.getElementById('modal-link').style.backgroundColor = color;
-        modal.classList.remove('hidden');
+            <div class="flex flex-col items-end justify-center">
+                <!-- 지도 모달 열기 버튼 -->
+                <button onclick="openMap()" class="text-sm bg-green-50 text-green-600 font-bold border border-green-200 px-3 py-1.5 rounded-full hover:bg-green-100 flex items-center shadow-sm">
+                    🗺️ 지도 보기
+                </button>
+            </div>
+        </header>
+
+        <!-- List Area -->
+        <div class="flex-1 overflow-y-auto scrollable-area p-4 pb-10 bg-slate-50" id="list-container">
+            <!-- List items will be injected here via JS -->
+        </div>
+    </div>
+
+    <!-- PAGE 2: Detail/Interaction View -->
+    <div id="detail-page" class="page page-hidden-right bg-white">
+        <!-- Detail Header -->
+        <header class="px-4 py-4 flex items-center border-b border-gray-100 z-20">
+            <button onclick="navigateBack()" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+            </button>
+            <div class="flex-1 text-center font-bold text-gray-800 mr-10" id="detail-top-title">에피소드</div>
+        </header>
+
+        <!-- Detail Content -->
+        <div class="flex-1 overflow-y-auto scrollable-area relative flex flex-col">
+            <!-- Visual Hero Area -->
+            <div id="detail-hero" class="h-64 flex flex-col justify-center items-center transition-colors duration-500 relative">
+                <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(circle at 2px 2px, black 1px, transparent 0); background-size: 20px 20px;"></div>
+                
+                <div class="w-28 h-28 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0 shadow-lg relative overflow-hidden mb-4 bg-white bg-opacity-70">
+                    <img id="detail-img" src="" alt="Spot Image" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div id="detail-img-fallback" class="hidden flex items-center justify-center w-full h-full text-gray-700 font-extrabold text-3xl"></div>
+                </div>
+
+                <h2 id="detail-title" class="text-2xl font-black text-gray-900 relative z-10 text-center px-4">타이틀</h2>
+                <p id="detail-subtitle" class="text-gray-700 mt-2 font-medium relative z-10 bg-white bg-opacity-40 px-3 py-0.5 rounded-full text-sm">서브타이틀</p>
+            </div>
+
+            <!-- Interaction Area -->
+            <div class="px-6 py-8 flex-1 flex flex-col items-center bg-white rounded-t-3xl -mt-6 z-20 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)]">
+                <!-- Mission Zone -->
+                <div id="mission-zone" class="w-full flex flex-col items-center hidden my-4">
+                    <div class="w-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl p-5 flex flex-col items-center shadow-sm">
+                        <div class="flex items-center gap-1.5 text-xs text-amber-600 font-bold bg-amber-50 px-3 py-1 rounded-full mb-3 select-none">
+                            🎯 Spot 미션 진행 중
+                        </div>
+                        <h3 id="mission-title" class="text-sm font-bold text-gray-800 text-center mb-1 break-keep">미션 타이틀</h3>
+                        <p id="mission-question" class="text-xs text-gray-500 text-center mb-4 break-keep">미션 설명</p>
+                        
+                        <!-- Game Area -->
+                        <div id="game-container" class="w-full flex flex-col items-center justify-center min-h-[140px] bg-white rounded-2xl p-4 shadow-inner border border-slate-100">
+                            <!-- Dynamic game elements will be injected here -->
+                        </div>
+                        
+                        <p id="mission-hint" class="text-[11px] text-gray-400 mt-3 text-center hidden break-keep bg-white px-3 py-2 rounded-xl border border-slate-100 w-full"></p>
+                        <div class="flex gap-4 mt-3">
+                            <button id="hint-toggle-btn" onclick="toggleHint()" class="text-xs text-blue-500 font-semibold hover:underline">힌트 보기</button>
+                            <span class="text-gray-300">|</span>
+                            <button onclick="showMissionSuccess()" class="text-xs text-gray-500 font-semibold hover:underline">미션 건너뛰기 ⚡</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="interaction-zone" class="w-full flex flex-col items-center justify-center my-8">
+                    <p class="text-xs text-green-600 font-bold bg-green-50 px-3 py-1 rounded-full mb-3 select-none">
+                        ✓ 미션 완료 구역
+                    </p>
+                    <p class="text-sm text-gray-400 mb-4 font-medium text-center">해당 구역에 도착하셨나요?<br>아래 버튼을 눌러 스토리를 확인하세요.</p>
+                    <div class="flex flex-col gap-3 w-full items-center">
+                        <button onclick="revealStory()" class="btn-interact bg-gray-900 text-white font-bold py-4 px-8 rounded-full shadow-lg hover:bg-black transition-all flex items-center space-x-2 w-fit">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                            </svg>
+                            <span>에피소드 확인하기</span>
+                        </button>
+                        <button onclick="playMissionAgain()" class="text-xs font-semibold text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-xl transition-all active:scale-95 flex items-center gap-1">
+                            🎮 미션 다시 플레이하기
+                        </button>
+                    </div>
+                </div>
+
+                <div id="story-container" class="story-content w-full text-left">
+                    <div class="w-12 h-1 bg-gray-200 rounded-full mb-6"></div>
+                    <div id="story-text" class="text-gray-700 leading-relaxed text-base break-keep"></div>
+                    
+                    <div class="mt-12 mb-8 pt-6 border-t border-gray-100 flex justify-between items-center w-full">
+                        <button onclick="navigateBack()" class="text-gray-500 font-medium hover:text-gray-900 flex-shrink-0 mr-4">목록으로</button>
+                        <button id="next-spot-btn" onclick="goToNextSpot()" class="text-blue-600 font-bold hover:text-blue-800 flex items-center flex-1 justify-end text-right break-keep">
+                            다음 장소 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= MODALS ================= -->
+<div id="confirm-modal" class="fixed inset-0 z-50 bg-black bg-opacity-60 hidden justify-center items-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl relative animate-[pulse-soft_0.3s_ease-out_1]">
+        <h3 class="text-lg font-bold text-gray-900 mb-2 text-center" id="confirm-title">알림</h3>
+        <p class="text-sm text-gray-600 mb-6 text-center break-keep leading-relaxed" id="confirm-message">내용</p>
+        <div class="flex gap-3">
+            <button onclick="closeConfirmModal(false)" class="flex-1 bg-gray-100 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-200 transition-colors text-sm" id="confirm-cancel-btn">취소</button>
+            <button onclick="closeConfirmModal(true)" class="flex-1 bg-gray-900 text-white font-bold py-3 rounded-xl hover:bg-black transition-colors text-sm" id="confirm-ok-btn">확인</button>
+        </div>
+    </div>
+</div>
+
+<div id="nfc-modal" class="fixed inset-0 z-50 bg-black bg-opacity-60 hidden justify-center items-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl relative animate-[pulse-soft_0.3s_ease-out_1]">
+        <button onclick="closeNFCGuide()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+        <h3 class="text-xl font-bold text-gray-900 mb-4 text-center">NFC 태그 안내 📱</h3>
+        <div class="space-y-4">
+            <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                <div class="font-bold text-blue-600 mb-1 flex items-center gap-1">🍎 iPhone (아이폰)</div>
+                <p class="text-sm text-gray-700 break-keep">아이폰은 단말기 <b>상단(카메라 옆 부분)</b>에 NFC 리더기가 있습니다. 화면이 켜진 상태에서 폰의 윗부분을 팻말에 가볍게 터치해 주세요.</p>
+            </div>
+            <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                <div class="font-bold text-green-600 mb-1 flex items-center gap-1">🤖 Galaxy (안드로이드)</div>
+                <p class="text-sm text-gray-700 break-keep">안드로이드 폰은 단말기 <b>뒷면 정중앙</b>에 주로 위치해 있습니다.<br><span class="text-xs text-red-500 font-bold">* 반드시 설정에서 'NFC 기본모드'를 켜주세요!</span></p>
+            </div>
+        </div>
+        <button onclick="closeNFCGuide()" class="mt-6 w-full bg-gray-900 text-white font-bold py-3 rounded-xl hover:bg-black transition-colors">확인했습니다</button>
+    </div>
+</div>
+
+<div id="map-modal" class="fixed inset-0 z-50 bg-white hidden flex-col">
+    <header class="px-4 py-4 flex justify-between items-center border-b border-gray-100 shadow-sm z-20 bg-white">
+        <h2 class="text-lg font-bold text-gray-800">야외가든 노선도</h2>
+        <button onclick="closeMap()" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+    </header>
+
+    <!-- Map Container -->
+    <div class="flex-1 overflow-auto bg-gray-200 relative" id="map-scroll-area">
+        <div id="map-zoom-wrapper" class="relative w-full origin-top-left" style="width: 100%;">
+            <img src="Snoopy garden map.jpg" class="w-full h-auto block" alt="Snoopy Garden Map">
+            <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1500 2400" preserveAspectRatio="none">
+                <!-- 라인 및 핀포인트를 모두 붉은색톤(#ef4444)으로 통일 적용 -->
+                <g id="dynamic-map-path-group" stroke="#ef4444" stroke-width="10" fill="none" stroke-linejoin="round" stroke-linecap="round" opacity="0.88">
+                    <!-- 동적 경로 및 핀포인트 마커가 추가될 요소 -->
+                </g>
+            </svg>
+        </div>
+    </div>
+    <div class="absolute bottom-6 right-4 flex flex-col gap-2 z-30">
+        <button onclick="zoomMap('in')" class="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 font-bold text-xl">+</button>
+        <button onclick="zoomMap('out')" class="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 font-bold text-2xl">-</button>
+    </div>
+</div>
+
+<script>
+    // [마스터 버전] 초기값을 모든 스팟이 해제된 상태(10)로 강제 설정하여 NFC 태깅 없이도 전체 콘텐츠에 접근할 수 있도록 함.
+    let unlockedSpotIndex = parseInt(localStorage.getItem('snoopyUnlockedSpot') || '10'); 
+    if (unlockedSpotIndex < 10) {
+        unlockedSpotIndex = 10;
+        localStorage.setItem('snoopyUnlockedSpot', '10');
+    }
+    let isTyping = false; 
+    let typeTimeouts = [];
+    let currentStoryHtml = "";
+    
+    let audioCtx;
+    let typingSoundInterval = null;
+    let confirmCallback = null;
+
+    function initAudio() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
     }
 
-    function closeModal() { 
-        document.getElementById('modal').classList.add('hidden'); 
+    document.addEventListener('click', initAudio, { once: true });
+    document.addEventListener('touchstart', initAudio, { once: true });
+
+    function playTypewriterSound() {
+        if (!audioCtx || audioCtx.state !== 'running') return;
+        const t = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle'; 
+        osc.frequency.setValueAtTime(120, t); 
+        osc.frequency.exponentialRampToValueAtTime(30, t + 0.05);
+        gain.gain.setValueAtTime(0.15, t); 
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05); 
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(t);
+        osc.stop(t + 0.06);
     }
-  </script>
+
+    function startTypingSound() {
+        if (typingSoundInterval) clearInterval(typingSoundInterval);
+        playTypewriterSound(); 
+        typingSoundInterval = setInterval(playTypewriterSound, 150); 
+    }
+
+    function stopTypingSound() {
+        if (typingSoundInterval) {
+            clearInterval(typingSoundInterval);
+            typingSoundInterval = null;
+        }
+    }
+
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[100] bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl text-center font-bold text-sm break-keep transition-all duration-300 opacity-0 scale-90 max-w-[300px] pointer-events-none`;
+        if (type === 'error') toast.className += ' border-2 border-red-500';
+        else if (type === 'success') toast.className += ' border-2 border-green-500';
+        else toast.className += ' border-2 border-blue-400';
+        
+        toast.innerHTML = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => { toast.classList.remove('opacity-0', 'scale-90'); toast.classList.add('opacity-100', 'scale-100'); }, 50);
+        setTimeout(() => {
+            toast.classList.remove('opacity-100', 'scale-100'); toast.classList.add('opacity-0', 'scale-90');
+            setTimeout(() => { toast.remove(); }, 300);
+        }, 2500);
+    }
+
+    function openConfirmModal(title, msg, onConfirm, hasCancel = true) {
+        document.getElementById('confirm-title').innerText = title;
+        document.getElementById('confirm-message').innerHTML = msg.replace(/\n/g, '<br>');
+        document.getElementById('confirm-cancel-btn').style.display = hasCancel ? 'block' : 'none';
+        confirmCallback = onConfirm;
+        const modal = document.getElementById('confirm-modal');
+        modal.classList.remove('hidden'); modal.classList.add('flex');
+    }
+
+    function closeConfirmModal(isOk) {
+        document.getElementById('confirm-modal').classList.add('hidden');
+        document.getElementById('confirm-modal').classList.remove('flex');
+        if (confirmCallback) { confirmCallback(isOk); confirmCallback = null; }
+    }
+
+    // --- [곡선 보간 알고리즘 추가] 직선 좌표를 부드러운 Bezier 곡선 패스 데이터로 전환 ---
+    function parsePolylinePoints(pointsStr) {
+        const tokens = pointsStr.trim().split(/[\s,]+/);
+        const points = [];
+        for (let i = 0; i < tokens.length; i += 2) {
+            if (tokens[i] && tokens[i+1]) {
+                points.push([parseFloat(tokens[i]), parseFloat(tokens[i+1])]);
+            }
+        }
+        return points;
+    }
+
+    // Catmull-Rom 스플라인 장력 계산을 활용해 부드러운 Cubic Bezier(C) 명령어 문자열 생성
+    function getBezierPath(points, tension = 0.22) {
+        if (points.length < 2) return '';
+        if (points.length === 2) return `M ${points[0][0]} ${points[0][1]} L ${points[1][0]} ${points[1][1]}`;
+
+        let d = `M ${points[0][0]} ${points[0][1]}`;
+
+        for (let i = 0; i < points.length - 1; i++) {
+            const p0 = points[i - 1] || points[i];
+            const p1 = points[i];
+            const p2 = points[i + 1];
+            const p3 = points[i + 2] || p2;
+
+            // 제어점 1 계산
+            const cp1x = p1[0] + (p2[0] - p0[0]) * tension;
+            const cp1y = p1[1] + (p2[1] - p0[1]) * tension;
+
+            // 제어점 2 계산
+            const cp2x = p2[0] - (p3[0] - p1[0]) * tension;
+            const cp2y = p2[1] - (p3[1] - p1[1]) * tension;
+
+            d += ` C ${cp1x.toFixed(2)} ${cp1y.toFixed(2)}, ${cp2x.toFixed(2)} ${cp2y.toFixed(2)}, ${p2[0]} ${p2[1]}`;
+        }
+        return d;
+    }
+
+    // --- [중요 핵심] 번들 변형(Transform Translate) 기법 전면 도입 ---
+    // 가상의 동적 텍스트 연산 대신 각 SVG 요소 자체에 transform="translate(x, y)" 속성을 직접 얹어 
+    // 브라우저의 GPU 가속과 연계해 오차 없는 완벽한 레이아웃 보간을 구현합니다.
+    function updateDynamicMapPath(focusIndex) {
+        const pathGroup = document.getElementById('dynamic-map-path-group');
+        if (!pathGroup) return;
+        pathGroup.innerHTML = ''; 
+        
+        let lastX = null, lastY = null;
+        
+        // focusIndex가 전달되면 해당 목적지 인덱스까지만 노선을 출력합니다.
+        // 없을 경우(일반 지도 열기) 현재 최대 해제된 다음 목적지까지 출력합니다.
+        let targetIndex = (focusIndex !== undefined && focusIndex !== null) 
+            ? focusIndex 
+            : Math.min(unlockedSpotIndex + 1, rawMapPaths.length - 1);
+        
+        if (targetIndex < 0) targetIndex = 0;
+        
+        for (let i = 0; i <= targetIndex; i++) {
+            if (rawMapPaths[i]) {
+                const offset = mapOffsets[i] || { x: 0, y: 0 };
+                let svgElement;
+                
+                if (rawMapPaths[i].startsWith('M')) {
+                    // Spot 7 (Path 데이터) 처리
+                    svgElement = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    svgElement.setAttribute("d", rawMapPaths[i]);
+                } else {
+                    // [곡선화 개편] 일반 Polyline 처리 -> 각진 구간이 전혀 없는 부드러운 Bezier 곡선 path로 변환
+                    svgElement = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    const points = parsePolylinePoints(rawMapPaths[i]);
+                    const smoothD = getBezierPath(points, 0.22); // 곡선의 자연스러운 부드러움을 위해 tension 0.22 할당
+                    svgElement.setAttribute("d", smoothD);
+                }
+
+                svgElement.setAttribute("stroke", "#ef4444"); // 붉은색 계열로 노선 통일
+                svgElement.setAttribute("stroke-width", "8");
+                svgElement.setAttribute("stroke-linecap", "round");
+                svgElement.setAttribute("stroke-linejoin", "round");
+                svgElement.setAttribute("fill", "none");
+                svgElement.setAttribute("transform", `translate(${offset.x}, ${offset.y})`);
+                pathGroup.appendChild(svgElement);
+                
+                if (i === targetIndex) {
+                    let localLastX = 0;
+                    let localLastY = 0;
+                    
+                    try {
+                        if (typeof svgElement.getPointAtLength === 'function') {
+                            const totalLength = svgElement.getTotalLength();
+                            const pt = svgElement.getPointAtLength(totalLength);
+                            localLastX = pt.x;
+                            localLastY = pt.y;
+                        } else {
+                            throw new Error("getPointAtLength not supported");
+                        }
+                    } catch (e) {
+                        // fallback: 브라우저 환경에서 API 예외 발생 시 문자열 수동 파싱
+                        if (rawMapPaths[i].startsWith('M')) {
+                            // Spot 7 패스의 물리적 기하학적 종착 좌표 설정
+                            localLastX = 33; 
+                            localLastY = 410; 
+                        } else {
+                            const tokens = rawMapPaths[i].trim().split(/[\s,]+/);
+                            localLastY = parseFloat(tokens[tokens.length - 1]);
+                            localLastX = parseFloat(tokens[tokens.length - 2]);
+                        }
+                    }
+                    
+                    lastX = localLastX + offset.x;
+                    lastY = localLastY + offset.y;
+                }
+            }
+        }
+        
+        // 종착지 핀포인트 마커 얹기 (초록색 톤 완전 제거 및 빨간색 통일)
+        if (lastX !== null && lastY !== null) {
+            const radarCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            radarCircle.setAttribute("cx", lastX); radarCircle.setAttribute("cy", lastY);
+            radarCircle.setAttribute("r", "25"); radarCircle.setAttribute("fill", "#ef4444");
+            radarCircle.setAttribute("class", "map-pulse-effect");
+            pathGroup.appendChild(radarCircle);
+            
+            const pinGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            pinGroup.setAttribute("transform", `translate(${lastX}, ${lastY})`);
+            pinGroup.setAttribute("class", "cursor-pointer pointer-events-auto select-none");
+            
+            pinGroup.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // 타겟 인덱스에 매칭되는 물리적 가이드 제공
+                const nextSpotNum = targetIndex + 1;
+                if (nextSpotNum <= tourData.length) {
+                    openConfirmModal("📍 목적지 가이드", `이곳은 [Spot ${nextSpotNum}. ${tourData[nextSpotNum - 1].title}] 안내판 앞입니다!\n\n팻말의 NFC 마크에 스마트폰을 가볍게 태그하여 스토리를 확인해 보세요! 🐾`, () => {}, false);
+                } else {
+                    openConfirmModal("🎉 완주 성공!", "스누피가든 야외가든 모든 탐험을 무사히 마치셨습니다!", () => {}, false);
+                }
+            });
+            
+            const pinShape = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            pinShape.setAttribute("d", "M0 0 C-15 -18 -22 -32 -22 -45 C-22 -62 -12 -72 0 -72 C12 -72 22 -62 22 -45 C22 -32 15 -18 0 0 Z");
+            pinShape.setAttribute("fill", "#ef4444"); pinShape.setAttribute("stroke", "#ffffff"); pinShape.setAttribute("stroke-width", "4");
+            
+            const pinDecor = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            pinDecor.setAttribute("cx", "0"); pinDecor.setAttribute("cy", "-45"); pinDecor.setAttribute("r", "7"); pinDecor.setAttribute("fill", "#ffffff");
+            
+            pinGroup.appendChild(pinShape); pinGroup.appendChild(pinDecor);
+            pathGroup.appendChild(pinGroup);
+        }
+    }
+
+    // --- 기존 상세 뷰 및 도슨트 로직 연동 커널 ---
+    const homePage = document.getElementById('home-page');
+    const detailPage = document.getElementById('detail-page');
+    const listContainer = document.getElementById('list-container');
+    const detailHero = document.getElementById('detail-hero');
+    const detailImg = document.getElementById('detail-img');
+    const detailImgFallback = document.getElementById('detail-img-fallback');
+    const detailTitle = document.getElementById('detail-title');
+    const detailSubtitle = document.getElementById('detail-subtitle');
+    const storyText = document.getElementById('story-text');
+    const storyContainer = document.getElementById('story-container');
+    const interactionZone = document.getElementById('interaction-zone');
+    const nextSpotBtn = document.getElementById('next-spot-btn');
+
+    window.onload = function() { checkNfcTag(); };
+
+    function checkNfcTag() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const masterCode = urlParams.get('master');
+        if (masterCode === 'peanuts') {
+            unlockedSpotIndex = tourData.length - 1; 
+            localStorage.setItem('snoopyUnlockedSpot', unlockedSpotIndex);
+            showToast("마스터 모드 활성화!<br>모든 에피소드가 해제되었습니다. 🐾", "success");
+            window.history.replaceState({}, document.title, window.location.pathname);
+            initList();
+            return;
+        }
+
+        const spotParam = urlParams.get('spot');
+        if (spotParam) {
+            const targetIndex = parseInt(spotParam) - 1;
+            if (!isNaN(targetIndex) && targetIndex >= 0 && targetIndex < tourData.length) {
+                if (targetIndex <= unlockedSpotIndex + 1) {
+                    if (targetIndex > unlockedSpotIndex) {
+                        unlockedSpotIndex = targetIndex;
+                        localStorage.setItem('snoopyUnlockedSpot', unlockedSpotIndex);
+                    }
+                    initList();
+                    openDetail(targetIndex);
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    return;
+                } else {
+                    openConfirmModal("경로 확인", "순서대로 진행해주세요! 이전 장소의 이야기를 먼저 확인해야 합니다. 🐾", () => {}, false);
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            }
+        }
+        initList();
+    }
+
+    function confirmReset() {
+        openConfirmModal("진행 초기화", "진행 상황과 미션 결과를 모두 초기화 하시겠습니까? 처음부터 다시 탐험을 시작하게 됩니다.", (confirmed) => {
+            if (confirmed) {
+                localStorage.removeItem('snoopyUnlockedSpot');
+                localStorage.removeItem('snoopyClearedMissions');
+                unlockedSpotIndex = -1; // 1번도 잠기도록 -1로 리셋
+                initList();
+                showToast("진행이 초기화되었습니다.", "info");
+            }
+        });
+    }
+
+    function initList() {
+        listContainer.innerHTML = '';
+        const banner = document.createElement('div');
+        banner.className = "w-full mb-5 cursor-pointer hover:scale-[0.98] transition-transform duration-200";
+        banner.onclick = openNFCGuide;
+        banner.innerHTML = `
+            <div class="bg-white rounded-2xl p-5 shadow-sm border-2 border-blue-100 flex flex-col items-center justify-center text-center relative overflow-hidden">
+                <div class="absolute -right-4 -top-4 w-16 h-16 bg-blue-50 rounded-full opacity-50"></div>
+                <img src="snoopy_logo.png" alt="Snoopy Logo" class="h-14 object-contain mb-2 z-10" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div class="hidden text-gray-700 font-black text-xl mb-2 z-10">스누피가든 NFC 투어</div>
+                <div class="flex items-center gap-1.5 text-xs text-blue-600 font-bold bg-blue-50 px-3 py-1.5 rounded-full z-10">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg>
+                    NFC 태그 방법 알아보기
+                </div>
+            </div>
+        `;
+        listContainer.appendChild(banner);
+
+        tourData.forEach((spot, index) => {
+            const card = document.createElement('div');
+            card.id = `spot-card-${index}`;
+            listContainer.appendChild(card);
+        });
+        updateListUI();
+        updateDynamicMapPath(); 
+
+        // 마지막 11번 루시의 가드닝 스쿨 스팟 카드 아래에 초기화 버튼 영역을 삽입합니다.
+        const resetContainer = document.createElement('div');
+        resetContainer.className = "w-full mt-6 mb-8 px-2 flex justify-center animate-[pulse-soft_3s_infinite]";
+        resetContainer.innerHTML = `
+            <button onclick="confirmReset()" class="text-xs font-semibold text-gray-400 bg-white border border-gray-200 px-5 py-3 rounded-2xl hover:bg-red-50 hover:text-red-500 hover:border-red-100 transition-all flex items-center gap-1.5 shadow-sm active:scale-95">
+                🔄 전체 진행 상황 초기화하기
+            </button>
+        `;
+        listContainer.appendChild(resetContainer);
+    }
+
+    function updateListUI() {
+        tourData.forEach((spot, index) => {
+            const isLocked = index > unlockedSpotIndex;
+            const card = document.getElementById(`spot-card-${index}`);
+            let cardClass = `bg-white rounded-2xl p-4 mb-3 shadow-sm border border-gray-100 flex items-center space-x-4 transition-all duration-300 transform `;
+            if (isLocked) {
+                cardClass += `opacity-60 grayscale cursor-not-allowed bg-gray-50`;
+                card.onclick = null;
+            } else {
+                cardClass += `cursor-pointer hover:shadow-md active:scale-[0.98]`;
+                card.onclick = () => openDetail(index);
+            }
+            card.className = cardClass;
+
+            const iconOrLock = isLocked 
+                ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>`
+                : `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-300" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>`;
+
+            card.innerHTML = `
+                <div class="w-14 h-14 rounded-xl flex items-center justify-center text-xl flex-shrink-0 shadow-inner relative overflow-hidden" style="background-color: ${spot.color}">
+                    <img src="${spot.imageName}" alt="${spot.title}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="hidden flex items-center justify-center w-full h-full text-gray-600 font-extrabold text-lg">${spot.id}</div>
+                    ${isLocked ? `<div class="absolute inset-0 bg-white bg-opacity-40 rounded-xl"></div>` : ''}
+                </div>
+                <div class="flex-1">
+                    <p class="text-xs text-gray-400 font-bold mb-0.5">Spot ${spot.id}</p>
+                    <h3 class="text-gray-800 font-bold text-lg leading-tight">${spot.title}</h3>
+                </div>
+                <div class="text-gray-300 flex flex-col items-center">
+                    ${isLocked ? `<span class="text-[10px] text-gray-400 font-bold mb-1">잠김</span>` : ''}
+                    ${iconOrLock}
+                </div>
+            `;
+        });
+    }
+
+    const spotMissions = [
+        { // Spot 1
+            type: 'word-scramble',
+            title: "스누피의 소설 첫 구절 맞추기 ✍️",
+            question: "스누피가 소설 첫 문장을 타자기로 완성할 수 있게 단어를 조립해주세요!",
+            words: [ "stormy", "dark", "night", "It", "was", "a", "and" ],
+            answer: [ "It", "was", "a", "dark", "and", "stormy", "night" ],
+            hint: "힌트: 한국어로 '어둡고 폭풍우 치는 밤이었다...'의 영어 번역 순서입니다."
+        },
+        { // Spot 2
+            type: 'timing-tap',
+            title: "비글 스카우트 마시멜로 굽기 🍢",
+            question: "모닥불 위의 마시멜로가 타지 않고 가장 알맞게 익은 노란색 영역일 때 멈추세요!",
+            hint: "힌트: 마시멜로 색깔이 황금갈색(노란 게이지 영역)으로 구워졌을 때 타이밍에 맞춰 터치하세요."
+        },
+        { // Spot 3
+            type: 'graffiti-eraser',
+            title: "사색 들판의 부정적 생각 지우기 🧹",
+            question: "마시와 패티의 담장에 적힌 부정적인 생각(불안, 실패, 걱정)들을 문질러 깨끗이 지워주세요!",
+            hint: "힌트: 손가락이나 마우스로 화면을 문질러 낙서를 70% 이상 깨끗하게 지우면 긍정적인 메시지가 나타납니다."
+        },
+        { // Spot 4
+            type: 'baseball-swing',
+            title: "찰리 브라운의 야구 구하기 ⚾",
+            question: "날아오는 공이 타격 점선 서클(홈플레이트) 안으로 쏙 들어왔을 때 화면의 <b>[타격]</b>을 탭하세요!",
+            hint: "힌트: 야구공이 바닥의 흰색 점선 원 안에 들어가 둥글게 커졌을 때 버튼을 터치하세요."
+        },
+        { // Spot 5
+            type: 'memory-match',
+            title: "피너츠 컬러 가든 카드 맞추기 🌸",
+            question: "뒤집힌 4개의 카드 중 색깔이 같은 카드 2쌍을 찾아 매칭해 주세요!",
+            hint: "힌트: 핑크 카드 두 장과 그린 카드 두 장을 각각 짝지어 선택하시면 됩니다."
+        },
+        { // Spot 6
+            type: 'snoopy-dressup',
+            title: "스누피 조 쿨 선글라스 씌우기 🕶️",
+            question: "스누피 캐릭터에게 멋쟁이 조 쿨(Joe Cool)의 상징인 물건을 골라 전달해주세요!",
+            hint: "힌트: 스누피가 선글라스를 착용하게 되면 성공입니다."
+        },
+        { // Spot 7
+            type: 'whack-pumpkin',
+            title: "황금 호박대왕 찾기 🎃",
+            question: "호박 더미 속에서 무작위로 튀어나오는 <b>황금색 호박대왕(🌟)</b>을 탭하여 수확해 보세요!",
+            hint: "힌트: 일반 호박(🎃)이 아닌 반짝이는 별모양 황금호박(🌟)이 나타났을 때 탭하셔야 합니다."
+        },
+        { // Spot 8
+            type: 'tug-of-war',
+            title: "라이너스의 애착 담요 지키기 🧣",
+            question: "스누피가 힘으로 빼앗아 가려는 담요를 <b>[잡아당기기]</b>를 마구 클릭해 라이너스 품으로 돌려주세요!",
+            hint: "힌트: 오른쪽으로 게이지가 도달할 때까지 연속으로 재빠르게 클릭하세요."
+        },
+        { // Spot 9
+            type: 'find-woodstock',
+            title: "둥지 속 우드스탁 찾기 🐥",
+            question: "A, B, C 세 둥지 중 우드스탁(🐥)이 깃든 둥지를 선택해 열어보세요!",
+            hint: "힌트: 우드스탁은 한 곳의 둥지에 무작위로 숨어있습니다."
+        },
+        { // Spot 10
+            type: 'stone-skip',
+            title: "웜 퍼피 레이크 물수제비 뜨기 🪨",
+            question: "파워 게이지 바가 노란색 박스 구역(75%~95%)에 다다랐을 때 돌 던지기를 터치해 물수제비를 띄우세요!",
+            hint: "힌트: 바가 거의 끝까지 찼을 때 타이밍에 맞춰 버튼을 누르면 성공합니다."
+        },
+        { // Spot 11
+            type: 'water-sprout',
+            title: "새싹에 물을 주어 꽃 피우기 🌱",
+            question: "<b>[물 뿌리기]</b> 버튼을 4번 터치해 새싹을 키우고 이쁜 꽃을 만개시키세요!",
+            hint: "힌트: 버튼을 반복해서 누르다 보면 새싹이 자라나서 마침내 활짝 피어납니다."
+        }
+    ];
+
+    function openDetail(index) {
+        if (index > unlockedSpotIndex) return;
+        currentSpotIndex = index;
+        const spot = tourData[index];
+        
+        storyContainer.classList.remove('revealed');
+        interactionZone.style.display = 'none'; // 기본 숨김
+        document.getElementById('mission-zone').classList.add('hidden');
+        
+        storyText.innerHTML = "";
+        storyText.classList.add('cursor-pointer');
+        currentStoryHtml = spot.text;
+        isTyping = false;
+        clearTypingTimeouts();
+        stopTypingSound(); 
+        nextSpotBtn.style.display = 'none';
+        detailHero.style.backgroundColor = spot.color;
+        
+        if (spot.color === "#40b049") {
+            detailTitle.className = "text-2xl font-black text-white relative z-10 text-center px-4 drop-shadow-sm";
+            detailSubtitle.className = "text-white mt-2 font-semibold relative z-10 bg-black bg-opacity-20 px-3 py-0.5 rounded-full text-sm";
+        } else {
+            detailTitle.className = "text-2xl font-black text-gray-900 relative z-10 text-center px-4";
+            detailSubtitle.className = "text-gray-700 mt-2 font-medium relative z-10 bg-white bg-opacity-50 px-3 py-0.5 rounded-full text-sm";
+        }
+        detailImg.style.display = 'block'; detailImg.src = spot.imageName;
+        detailImgFallback.style.display = 'none'; detailImgFallback.innerHTML = spot.id;
+        detailTitle.innerHTML = spot.title; detailSubtitle.innerHTML = spot.subtitle;
+
+        homePage.classList.remove('page-active'); homePage.classList.add('page-hidden-left');
+        detailPage.classList.remove('page-hidden-right'); detailPage.classList.add('page-active');
+
+        // 미션 클리어 상태 검증
+        let clearedMissions = JSON.parse(localStorage.getItem('snoopyClearedMissions') || '{}');
+        if (clearedMissions[index]) {
+            // 이미 깼다면 바로 에피소드 열기 버튼 표출
+            interactionZone.style.display = 'flex';
+        } else {
+            // 안 깼다면 미션 영역 초기화 및 노출
+            document.getElementById('mission-zone').classList.remove('hidden');
+            initMission(index);
+        }
+    }
+
+    function playMissionAgain() {
+        // 해당 미션이 다시 동작할 수 있도록 로컬스토리지에서 지움
+        let clearedMissions = JSON.parse(localStorage.getItem('snoopyClearedMissions') || '{}');
+        delete clearedMissions[currentSpotIndex];
+        localStorage.setItem('snoopyClearedMissions', JSON.stringify(clearedMissions));
+
+        // UI 상태 재설정 및 미션 다시 로드
+        interactionZone.style.display = 'none';
+        storyContainer.classList.remove('revealed');
+        document.getElementById('mission-zone').classList.remove('hidden');
+        initMission(currentSpotIndex);
+    }
+
+    function navigateBack() {
+        clearTypingTimeouts(); stopTypingSound(); isTyping = false;
+        detailPage.classList.remove('page-active'); detailPage.classList.add('page-hidden-right');
+        homePage.classList.remove('page-hidden-left'); homePage.classList.add('page-active');
+    }
+
+    function initMission(index) {
+        const titleEl = document.getElementById('mission-title');
+        const questionEl = document.getElementById('mission-question');
+        const gameContainer = document.getElementById('game-container');
+        const hintEl = document.getElementById('mission-hint');
+        
+        hintEl.classList.add('hidden');
+        document.getElementById('hint-toggle-btn').innerText = "힌트 보기";
+        
+        const mission = spotMissions[index];
+        if (!mission) return;
+        
+        titleEl.innerText = mission.title;
+        questionEl.innerHTML = mission.question;
+        hintEl.innerHTML = mission.hint;
+        gameContainer.innerHTML = '';
+        
+        if (mission.type === 'word-scramble') {
+            initWordScramble(mission, gameContainer);
+        } else if (mission.type === 'timing-tap') {
+            initTimingTap(mission, gameContainer);
+        } else if (mission.type === 'graffiti-eraser') {
+            initGraffitiEraser(mission, gameContainer);
+        } else if (mission.type === 'baseball-swing') {
+            initBaseballSwing(mission, gameContainer);
+        } else if (mission.type === 'memory-match') {
+            initMemoryMatch(mission, gameContainer);
+        } else if (mission.type === 'snoopy-dressup') {
+            initSnoopyDressUp(mission, gameContainer);
+        } else if (mission.type === 'whack-pumpkin') {
+            initWhackAPumpkin(mission, gameContainer);
+        } else if (mission.type === 'tug-of-war') {
+            initTugOfWar(mission, gameContainer);
+        } else if (mission.type === 'find-woodstock') {
+            initFindWoodstock(mission, gameContainer);
+        } else if (mission.type === 'stone-skip') {
+            initStoneSkip(mission, gameContainer);
+        } else if (mission.type === 'water-sprout') {
+            initWaterSprout(mission, gameContainer);
+        }
+    }
+
+    function toggleHint() {
+        const hintEl = document.getElementById('mission-hint');
+        const btn = document.getElementById('hint-toggle-btn');
+        if (hintEl.classList.contains('hidden')) {
+            hintEl.classList.remove('hidden');
+            btn.innerText = "힌트 숨기기";
+        } else {
+            hintEl.classList.add('hidden');
+            btn.innerText = "힌트 보기";
+        }
+    }
+
+    function initWordScramble(mission, container) {
+        let currentWords = [];
+        let scrambled = [...mission.words];
+        scrambled.sort(() => Math.random() - 0.5);
+        
+        const displayDiv = document.createElement('div');
+        displayDiv.className = "w-full min-h-[48px] bg-slate-50 border border-slate-100 rounded-xl px-3 py-2 flex flex-wrap gap-1.5 items-center justify-center text-sm font-bold text-gray-800 mb-4";
+        displayDiv.innerText = "단어 버튼을 클릭하여 소설을 완성하세요.";
+        displayDiv.classList.add('text-gray-400');
+        container.appendChild(displayDiv);
+        
+        const buttonsDiv = document.createElement('div');
+        buttonsDiv.className = "flex flex-wrap gap-2 justify-center mb-3";
+        container.appendChild(buttonsDiv);
+
+        const resetContainer = document.createElement('div');
+        resetContainer.className = "w-full flex justify-center mt-2";
+        container.appendChild(resetContainer);
+        
+        function updateDisplay() {
+            if (currentWords.length === 0) {
+                displayDiv.innerText = "단어 버튼을 클릭하여 소설을 완성하세요.";
+                displayDiv.classList.add('text-gray-400');
+            } else {
+                displayDiv.innerText = currentWords.join(' ') + ' ...';
+                displayDiv.classList.remove('text-gray-400');
+            }
+            
+            buttonsDiv.innerHTML = '';
+            scrambled.forEach((word, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "bg-slate-100 border border-slate-200 text-slate-700 px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-slate-200 active:scale-95 transition-all";
+                btn.innerText = word;
+                btn.onclick = () => {
+                    currentWords.push(word);
+                    scrambled.splice(idx, 1);
+                    updateDisplay();
+                    checkWin();
+                };
+                buttonsDiv.appendChild(btn);
+            });
+            
+            resetContainer.innerHTML = '';
+            if (currentWords.length > 0) {
+                const resetBtn = document.createElement('button');
+                resetBtn.className = "text-[11px] text-red-500 font-bold hover:underline";
+                resetBtn.innerText = "🔄 다시 작성하기";
+                resetBtn.onclick = () => {
+                    currentWords = [];
+                    scrambled = [...mission.words].sort(() => Math.random() - 0.5);
+                    updateDisplay();
+                };
+                resetContainer.appendChild(resetBtn);
+            }
+        }
+        
+        function checkWin() {
+            if (currentWords.length === mission.answer.length) {
+                const isCorrect = currentWords.every((val, idx) => val === mission.answer[idx]);
+                if (isCorrect) {
+                    showMissionSuccess();
+                } else {
+                    showToast("순서가 틀렸습니다! 다시 시도해보세요. 🐾", "error");
+                }
+            }
+        }
+        
+        updateDisplay();
+    }
+
+    function initTimingTap(mission, container) {
+        // SVG 애니메이션 주입 (모닥불 아지랑이 및 캐릭터 댄스/패닉)
+        if (!document.getElementById('campfire-game-styles')) {
+            const style = document.createElement('style');
+            style.id = 'campfire-game-styles';
+            style.innerHTML = `
+                @keyframes flicker-flame {
+                    0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.95; }
+                    50% { transform: scale(1.12) rotate(2deg); opacity: 1; }
+                }
+                .anim-flame-red { 
+                    transform-origin: 37px 60px;
+                    animation: flicker-flame 0.4s infinite alternate; 
+                }
+                .anim-flame-orange { 
+                    transform-origin: 35px 65px;
+                    animation: flicker-flame 0.3s infinite alternate-reverse; 
+                }
+                @keyframes woodstock-dance {
+                    0%, 100% { transform: translateY(0) rotate(0deg); }
+                    50% { transform: translateY(-5px) rotate(2deg); }
+                }
+                .anim-woodstock-dance { 
+                    animation: woodstock-dance 0.4s infinite; 
+                }
+                @keyframes woodstock-panic {
+                    0%, 100% { transform: translateX(0) scaleY(1); }
+                    25% { transform: translateX(-3px) scaleY(1.06); }
+                    75% { transform: translateX(3px) scaleY(0.94); }
+                }
+                .anim-woodstock-panic { 
+                    animation: woodstock-panic 0.25s infinite; 
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        const gameWrapper = document.createElement('div');
+        gameWrapper.className = "w-full flex flex-col items-center";
+        container.appendChild(gameWrapper);
+
+        // 게임씬 구성 (공식 모닥불 SVG 및 마시멜로 꼬챙이를 든 우드스탁 SVG 탑재)
+        gameWrapper.innerHTML = `
+            <div class="relative w-full h-[180px] bg-[#FAF6EE] rounded-2xl overflow-hidden flex flex-col justify-between p-3 select-none border border-amber-100/60 shadow-inner">
+                <div class="absolute inset-0 opacity-55 bg-[linear-gradient(to_bottom,_#FFECD2_0%,_#FCF6EB_100%)] pointer-events-none"></div>
+                
+                <!-- 게임 씬 연출 영역 -->
+                <div class="relative w-full h-28 flex items-end justify-between px-2 z-10 pointer-events-none">
+                    <!-- 왼쪽 장식 공간 -->
+                    <div class="w-12 h-10"></div>
+                    
+                    <!-- 공식 모닥불 SVG (마시멜로 아래 배치되도록 왼쪽으로 조정) -->
+                    <div class="absolute flex flex-col items-center justify-end mb-1" style="right: 145px; bottom: 8px; width: 67.13px; height: 88.00px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 65.04 85.25" class="w-full h-full" preserveAspectRatio="xMidYMid meet">
+                          <defs>
+                            <style>
+                              .cls-f1 { fill: #b68250; }
+                              .cls-f2 { fill: #f2981d; }
+                              .cls-f3 { fill: #ea5550; }
+                              .cls-f4 { fill: #9e9e9f; }
+                            </style>
+                          </defs>
+                          <!-- 연기/불꽃 잔영 -->
+                          <path class="cls-f4" d="M40.45,1.44c-.08.15,0,.38-.23.46l-.46-.38c-.23.38-.76.83-.53,1.37.38.08.99.23.61.76-.3.38-1.14.46-1.21.99.53-.08,1.37-.08,1.82.38.23.76-.99.99-.15,1.67.08.91-.53,1.37-1.06,1.97.23.38.91.3,1.06.91,0,.91-.46,1.67-1.21,2.05-.45.38-1.29.46-1.97.38.3.53,1.29.68,1.21,1.52.68-.08,1.52-.76,2.28-.15.68.68-.15,1.37-.3,2.05l-1.52,1.52c-.08,1.67-.15,3.49.68,4.78,0,.3-.15.38-.38.46-.61-.38-1.44-.38-1.97.08-1.21.83-.91,2.43-.91,3.72-.68-.3-.68-1.14-.83-1.82-.08-1.67,1.37-2.58,2.66-3.11l-.15-3.87c-1.14-.08-1.82,1.97-3.04.91.23-1.29,1.29-1.82,1.9-2.96-.08-.68.46-1.75-.38-2.13-.61-.08-1.29,0-1.67-.46-.23-.99,1.29-.99,1.06-1.97-.3-.53-1.52-.38-1.14-1.29.68-.83,2.13-1.29,1.97-2.58-.3-.76-2.05-.53-1.37-1.67,1.06-.38,1.14-1.75,1.9-2.43,1.21-.61,1.52-1.97,2.66-2.58.91.08.08,1.14.68,1.44h0Z"/>
+                          <polygon class="cls-f4" points="38.86 7.29 38.55 7.51 38.86 7.29 38.86 7.29"/>
+                          <path class="cls-f4" d="M37.72,9.18c0,.23-.46.53-.76.3l.15-.38.61.08h0Z"/>
+                          <path class="cls-f4" d="M39.24,10.09c-.23.46-.61.61-1.06.68.08-.3.76-.83,1.06-.68h0Z"/>
+                          <path class="cls-f4" d="M39.84,14.12c-.15.68-.76,1.37-1.37,1.52-.23-.76.76-1.37,1.37-1.52h0Z"/>
+                          <!-- 전체 아웃라인 및 장작 -->
+                          <path d="M38.25,32.56c-.15.83-.99,1.52-1.37,2.28.76,1.14,1.82,2.05,1.67,3.64.15,4.25-.53,8.5-1.14,12.6-.15.61.15,1.14.76,1.29,1.29.08,2.66-.15,3.64.61,2.28,1.82.46,4.86.76,7.29-.38,1.75-1.29,3.26-1.9,5.08,1.9-.53,4.63-1.21,6.22.38.91.76,1.82,1.75,2.73,2.66-.08,1.44-1.82,1.75-2.81,2.35-2.66,1.44-6.15,1.82-9.26,1.52.23.76,1.14,1.14,1.82,1.44.46-.38.23-1.29,1.06-1.06,2.28.61,5.46-.3,7.74.99l1.67,1.37c.08.61-.46.68-.83.99-.53.15-.38-.46-.61-.68-1.37,0-3.79,1.14-4.48-.83-.08-.08.08-.3-.08-.46-.3-.08-.76,0-.99.23.3,1.37,1.75,1.29,2.58,2.12-.3,1.14-2.05.15-2.5,1.06-.38.08-.38-.3-.53-.46-.53.08-1.37-.23-1.52.53l-.46.23c-3.04-.99-7.13,0-9.26-2.58-1.9-.23-4.1-.15-5.84.38-2.5.08-5.16.08-6.75-1.97l-1.14-1.29c-3.64.46-7.51.46-11,1.21-.46-.15-1.06-.08-1.29-.68.3-.91,1.59-.61,2.5-.83l1.75-.38c1.59.91,3.95.53,5.77.3-.23-.53.3-1.44.83-1.97,1.06-.38,1.59.76,2.5.99,2.2.61,3.79-.68,5.69-1.06.08-.61-.46-1.21-1.06-1.59-.3-.23-.91-.23-.99-.76.38-1.37,1.82,0,2.88-.3.53-.3,1.67.15,1.67-.83.15-2.05.53-4.55-1.59-5.77,1.52-2.12,2.35-4.93,2.66-7.74.38-.99,1.44-.99,2.35-1.06.53,0,1.14.08,1.59.3-.68-3.49,2.43-5.84,3.79-8.5-.46-1.67-2.5-2.96-1.52-5.01.15-1.29,1.37-2.28,1.21-3.57.38-1.29,1.21-2.35,2.35-3.04.23.08.68.15.68.61h0Z"/>
+                          <!-- 불꽃 파트 (깜빡임 애니메이션 등록) -->
+                          <path class="cls-f3 anim-flame-red" d="M37.26,38.02c.46,4.78-.38,9.87-1.44,14.42.91,2.96,5.69-.53,5.69,3.19,0,1.44-.3,2.73-.68,4.02-.15,2.5-1.14,4.78-2.13,6.91l-2.88,1.97c0-1.97,1.9-3.72.91-5.77-2.2-1.97-4.48-4.1-4.02-7.36l.76-1.82c-.53-1.52-.91-3.49-.15-5.01.91-1.67,2.28-3.19,3.34-4.86-.15-1.52-1.59-2.43-1.67-3.95.3-1.21.61-2.28,1.21-3.26.76.08.76.99,1.06,1.52h0Z"/>
+                          <path class="cls-f2 anim-flame-orange" d="M31.27,53.28c.91,2.13-1.21,3.49-1.44,5.39-.53.83.61,1.52-.08,2.28-.61,1.75-.99,3.64-.76,5.62-.3.08-.68-.3-.76-.61.08-2.05.38-4.63-1.37-6.07.91-2.2,1.97-4.4,2.28-6.83.61-.53,1.82-.76,2.12.23h0Z"/>
+                          <path class="cls-f2 anim-flame-orange" d="M35.52,62.76c.46.46.53,1.21.3,1.82l-1.82,4.71c-1.52-.08-2.96-1.29-3.49-2.66-.61-2.12-.08-4.48.83-6.3-.08-.83-.23-1.82.3-2.58.23,2.13,2.5,3.64,3.87,5.01h0Z"/>
+                          <path class="cls-f2 anim-flame-orange" d="M47.43,68.89c-1.89,1.82-5.82,1.99-8.91,1.54.53-1.88,2.87-3.18,5.36-3.47,1.66-.11,2.79.97,3.55,1.93h0Z"/>
+                          <!-- 장작 받침대 -->
+                          <path class="cls-f1" d="M30.51,69.59l-2.05.99-2.05-.61-1.06-1.67c1.67-.61,3.95-.15,5.16,1.29h0Z"/>
+                          <path d="M2.43,69.97c2.88-.15,6.6-.08,9.49-.46.08,0,.23.08.23.15v.15c-3.57,1.14-7.82.53-11.31,1.97-.38,0-.61-.3-.83-.61,0-.68.91-.68,1.44-.91.76.15.91-.76,1.37-.91l-.38.61h0Z"/>
+                          <path class="cls-f1" d="M32.1,71.87c-.3.15-.91.23-1.21,0l-.08-.15c.38-.38,1.06-.23,1.29.15h0Z"/>
+                          <path class="cls-f1" d="M37.95,75.82c-1.37.3-2.66-.38-3.79-.91,0-.76,1.44-1.14.83-2.12l.08-.3c1.14.99,1.97,2.2,2.88,3.34h0Z"/>
+                          <path class="cls-f1" d="M41.67,75.44c-.76,0-1.06-.99-1.82-1.37.46-.08.83.08,1.21.3l.61,1.06h0Z"/>
+                          <polygon class="cls-f1" points="45.76 74.15 45.84 74 46.52 74.15 45.76 74.15 45.76 74.15"/>
+                          <path d="M55.63,75.97c3.11.15,6.3-.46,9.41-.3-.3.61-1.29.38-1.82.68-2.96.38-6,.53-9.11.61-.53-.15-.76-.76-.53-1.29.38-.23.76-.99,1.37-.61.08.46.08,1.06.68.91h0Z"/>
+                          <path d="M43.03,83.56c-2.5-.91-5.77-.23-8.42-.61l-1.75-1.14c-1.82-.23-3.04-1.75-4.86-1.97-6-.76-11.16,1.67-16.77,2.2-.91.23-1.14-1.14-1.97-.3-.38.53.3,1.06.61,1.44,4.63,2.73,10.62.83,15.79.38,1.59-.76,3.95.53,4.86-1.52.61-.08,1.37.08,1.9.3,1.44.3.68,2.35,2.12,2.66.83-.76,2.13-.91,3.34-.91,2.12,2.2,5.54.61,8.2.61v-.23c-.91-.46-2.35.08-3.04-.91h0ZM16.17,83.86c-.76-.08-1.59-.23-2.28-.53.53-.91,2.05-.3,2.96-.76,3.26-.46,7.06-.83,10.4-.76-3.34,1.59-7.21,1.97-11.08,2.05h0ZM29.52,82.12c-.15.15-.46,0-.53-.23.23-.15.38.08.53,0v.23h0ZM18.06,81.36c3.49-.91,7.74-1.82,11.31-.68l.15.23c-3.79-.15-7.89.3-11.46.46h0Z"/>
+                        </svg>
+                    </div>
+                    
+                    <!-- 공식 우드스탁 SVG (오른쪽에 마시멜로 꼬챙이를 들고 배치) -->
+                    <div id="woodstock-wrapper" class="absolute right-2 bottom-2 pointer-events-none select-none transition-transform duration-300 ease-out" style="width: 140px; height: 92.69px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50.75 33.6" class="w-full h-full" id="game-woodstock-svg" preserveAspectRatio="xMidYMid meet">
+                          <defs>
+                            <style>
+                              .cls-w1 { fill: #231815; }
+                              .cls-w2 { fill: #fff; transition: fill 0.3s; }
+                              .cls-w3 { fill: #b68250; }
+                              .cls-w4 { fill: #e5ddcf; }
+                              .cls-w5 { fill: #ffe400; }
+                            </style>
+                          </defs>
+                          <!-- 노란 바디 -->
+                          <path class="cls-w5" d="M37.54,21.02c1.09-.49,2.48-.15,3.19.3l1.2.11c.11-1.54.86-1.92,1.5-1.84l.6-.45c.26-2.22.11-5.26,1.47-5.37l-1.43-.64-1.95-.3-2.63-.56-1.8-.45-2.26.04-2.29-.38-1.01.79-2.52,1.5-2.78.98-.75,1.8.04,1.65,2.14,1.35,3.31.49,1.99.56,1.35.94-.53,1.95.34.34,1.62-.38.79-.56-.23-1.13.64-.75h0Z"/>
+                          <polygon class="cls-w5" points="31.45 32.52 33.33 32.3 34.65 33.01 36.11 31.43 37.92 31.17 40.81 31.24 43.14 31.7 44.76 31.28 45.74 29.67 45.06 28.76 42.65 28.95 38.93 29.4 37.28 29.67 36.75 28.2 36.11 26.1 35.48 26.13 34.2 27.6 33.3 26.43 31.87 27.64 31 29.18 31.45 32.52 31.45 32.52"/>
+                          <!-- 종합 외곽선 (우드스탁 + 꼬챙이 + 마시멜로우 외곽선 병합) -->
+                          <path class="cls-w1" d="M50.68,30.52v-.06c-.23.03-.46.06-.7.08-.27-.04-.53-.09-.8-.13-.05-.02-.26-.13-.13-.13v-.06c.51,0,.78-.29,1.28-.29.22-.17.3-.22.21-.52-.02-.07-.01-.12-.1-.12v-.06c-.41.2-.81.26-1.27.38-.32.08-.62.23-.94.31-.54.15-1.06.21-1.61.33-.48.11-1.05.4-1.58.33-.32-.05-.6-.33-.87-.49-.08-.05-.65-.41-.65-.22-.04.12-.08.23-.12.35.19.12,1.03.61.77.89-.54.58-1.33-.37-1.88-.41-.02,0-.04,0-.06,0-.25.03-.5.06-.76.09-.42.03-.85.07-1.27.1-.23.06-.47.12-.7.18-.38.02-.7-.21-1.04-.21v-.23c.35-.22,1.34-1.02,1.69-1.06.4-.05.7.07,1.1.07.34-.15.78.07,1.16.05.21-.01.34-.1.53-.14.37-.05.73-.09,1.1-.14.29-.15.93-.06,1.2.04.15.05.38.36.56.29.12-.25,0-.44-.15-.61-.24-.29-.64-.52-.99-.61-.5-.13-1.17-.03-1.68,0-.7.03-1.39.06-2.09.09-.39.09-.78.18-1.16.27v-.06h.06c.08-.4.3-.72.41-1.1.06-.23.02-.53,0-.76-.02-.11-.04-.22-.07-.33,0,0,0-.01,0-.02-.13-.28-.3-.42-.49-.66-.23-.29-.41-.67-.49-1.04-.06-.27.08-.49.18-.7.19-.41.26-1.12-.08-1.47-.18-.18-.7-.32-.97-.31-.25,0-.53.13-.76-.01-.23-.14-.17-1.38.12-1.38-.29-.45-.9.03-1.14.31-.12.29-.25.57-.37.86-.02.14.08.33.11.46,0,.07-.01.15-.02.23-.1.23-.26.3-.5.36-.1.02-.46.19-.46.11h-.12c-.07-.37.15-.54.25-.83.04-.15.09-.29.13-.44.01-.02.02-.05.03-.07h-.06c-.12-.31-.42-1.02-.61-1.26-.74-.92-1.89-1.15-2.99-1.39-.55-.13-1.18-.33-1.76-.38-.44.02-.89.04-1.33.06-.25-.28-.6-.41-.9-.57-.26-.14-.52-.27-.78-.41-.21-.11-.42-.1-.59-.29-.36-.39.27-1.84.44-2.21.12-.26.71-.83,1.02-.83.65-.24,1.32-.35,1.96-.62.24-.19.49-.38.74-.57.17-.11.42-.12.59-.23.48-.33.86-.74,1.31-1.12.09-.08.51-.23.51-.31.88.21,1.92.17,2.85.17.24-.18.62-.06.93-.06.17-.08.41.02.58.05.59.08,1.13.17,1.67.34.28.09.55.18.83.27.3.05.61.1.91.15.13.07.26.15.39.23.46.05.91.1.35.43.02,0,.03.01.05.02v-.06c.55-.15.51.11.94.25.25.05.49.11.74.17.37.11.74.34,1.17.34.1-.09.2-.18.31-.27.17-.21.33-.76.2-1.03-.15-.33-2.44-1.04-2.9-1.11-.38-.07-.79-.01-1.15-.12-.12-.04-.42-.16-.42-.32.1-.03.41-.11.41-.23.07-.23,0-.45.01-.7,0-.51.09-1.02.13-1.51.05-.53.37-1.19.21-1.73-.15-.48-1.85-.54-2.31-.71-.13-.1-.27-.2-.4-.3-.3-.16-.78-.2-1.03-.45-.45-.43-.22-.87-.24-1.41-.03-.59-.2-1.45-.86-1.59-.29-.06-.52.06-.8.05-.42,0-1.07-.07-1.44.03-.6.15-.7.65-.92,1.13-.18.38-.49.82-.84,1.04-.21.13-.45.28-.7.32-.15.02-.32-.06-.46-.07-.19.02-.38.04-.58.06-.42,0-.83.02-1.25.02-.12.09-.25.19-.37.28-.1.08-.21.12-.27.25-.2.35-.36.79-.4,1.21-.03.27.1.45.12.69.02.33-.14,1.54-.36,1.69-.28.2-.68.01-1.02,0-.27.03-.54.05-.81.08-.87.05-1.6.06-2.26.6-.15.12-.33.22-.37.41-.19.97,1.27.86,1.93.86.22-.1.64.01.87.03.33,0,.66-.01.99-.02.29.02.58.05.87.07.37-.03.74-.05,1.11-.08.11.01.41-.01.41.12h.06v.06c-.49.06-.37.31-.72.55-.3.16-.61.32-.92.47-.22.06-.45.12-.67.18-.16.09-.23.26-.36.38-.06.05-.07.03-.07.11-.25-.08-.52-.14-.81-.08-.23.04-.4.25-.6.34-.27.11-.58.1-.84.23-.22.11-.34.3-.56.4-.15.07-.34.1-.45.25-.23.3-.19.56-.26.94-.09.46-.25.9-.27,1.41.01.17.03.35.04.52-.02.12-.04.24-.06.35-.04.36.13.68.31.95.08.12.21.13.33.2.13.09.26.19.39.29.24.14.49.23.73.39.24.17.3.45.6.54.5.14,1.12-.05,1.67.02.37.05.65.35,1.01.44.97.25,2.09.5,2.99.9.15.07.31.06.43.18.19.18.21.47.21.74-.01.35-.18.64-.45.84-.31.22-.83-.15-1.14-.17-.38-.03-1.2.09-1.55.2-.13.09-.26.17-.39.26-.06.02-.12.04-.18.07-.18-.07-.36-.14-.54-.21-.04-.02-.08-.03-.12-.05-.22-.13-.43-.25-.65-.38-.75-.38-1.6-.73-2.44-.91-.58-.12-1.81.4-2.21-.03,0,0-.02-.02-.03-.03,0-.01-.02-.02-.03-.03-.31-.43-.62-.85-.93-1.28-.24-.22-.48-.45-.72-.67-.78-1.08-.71-2.56-2.13-3.13-.14-.07-.27-.15-.41-.22v-.06c.52-.31.59-1.83.42-2.44-.1-.35-.79-1.71-1.26-1.6-.16.04-.26.21-.26.38.01.33.27.54.36.83.15.47.23,2.28-.21,2.5-.21.11-.56-.13-.75-.17-.27-.07-.56-.09-.77-.25-.26-.2-.29-.48-.41-.75-.28-.65-.49-1.36-.66-2.05-.09-.34-.12-.72-.28-1.03-.19-.38-.53-.42-.81-.69-.24-.23-.41-.59-.68-.76-.28-.17-.52-.37-.8-.54-.28-.17-2.03-.87-2.03-1.17.05-.25.11-.51.16-.76.11-.25.21-.51.32-.76.15-.55.16-1.08.24-1.67.03-.26.17-.45.11-.74-.07-.35-.23-.65-.39-.96-.1-.18-.12-.35-.29-.47-.55-.41-1.15-.72-1.7-1.1-.41-.29-.8-.52-1.22-.76-.15-.09-.3-.18-.44-.27-.17-.03-.34-.07-.51-.1-.11-.03-.46-.12-.46-.24-.39.04-.74-.06-1.16-.06-1.04,0-1.82.2-2.53.85-.12.15-.23.31-.35.46-.11.13-.55.47-.55.6-.08,0-.06-.02-.06.06-.08,0-.06.02-.06-.06C2.41,2.05,2.16.14.64,0c-.11.04-.21.08-.32.11-.09.05-.23.24-.32.24.25.79,1.11.82,1.64,1.32.43.4.44.97.72,1.44.17.25.35.51.52.76.13.36-.48,1.11-.59,1.48-.11.37-.13.97-.04,1.38.04.11.08.22.12.33.18.16.36.33.54.49.21.25.32.68.58.86.45.32,1.01.45,1.42.85.18.18.22.42.39.6.31.23.62.47.93.7.25.22.36.54.65.72.44.27,1.02.33,1.6.33.18-.04.36-.08.54-.13.36-.17.65-.54.99-.77.28-.2.6-.29.88-.48.23-.16.28-.54.6-.55.39-.02,1.03.35,1.39.48.56.22,1.31.46,1.73.93.15.2.29.41.44.61.29.27.67.52.82.9.18.43.19.89.31,1.37.07.2.15.4.22.6.06.25.12.49.17.74.08.26.57.97.47,1.22-.25.61-3.16,1.15-3.91.89-.13-.11-.26-.21-.39-.32-.2-.16-.42-.24-.61-.39-.13-.13-.26-.27-.4-.4-.07-.05-.6-.35-.6-.11-.13.62.71,1.1,1.09,1.41.34.28.61.63,1.07.69.42.05.75-.26,1.12-.35.27-.07.56.06.85.06.32-.19.88-.06,1.25-.23.28-.18.56-.36.83-.54.13-.11.21-.4.38-.44.36-.09,1.15.31,1.45.47.33.18.74.21,1.08.39,1.1.61,1.05,1.89,1.54,2.88.2.41.67.4.92.74.11.15.09.36.14.54.06.12.12.24.17.36.02.3-.87.53-1,.95-.05.17.04.27.04.44.33-.01.71-.02,1.02-.12.19-.1.38-.19.57-.29.09-.06.15-.23.27-.23v-.06c.58.21,1.08.1,1.74.16.31.07.62.15.93.22.27.07.45.3.68.43.23.09.45.19.68.29.16.13.24.31.42.42.21.09.42.19.63.28.22.2.44.39.65.59.38.21.85.2,1.2.46.1.07.16.34.16.46-.32-.03-1.66.09-1.85.25-.26.23-.4,1.22-.52,1.59-.12.38-.26.78-.4,1.16-.13.34-.33.74-.37,1.12-.06.45.09.84.21,1.2.15.5,1.08.61,1.08.71.15.35.17.94.17,1.34.81-.03.82-.18,1.26-.73.04-.06.11-.09.15-.15.03-.05.02-.1.08-.11.09,0,.2.14.27.19.02.01.28.18.28.11h.06c.45-.42.56-.79.72-1.39.03-.1.06-.2.09-.3-.41-.47-.35-1.97-.35-2.67h.06v-.06h.12c.11.14.29.18.47.19.67.04.52-.79.52-1.24.09-.09.23-.21.23-.35h.12c.23.54.61,1.06.53,1.74-.05.44-.31.87-.5,1.24-.2.4-.39.82-.54,1.24-.07.19-.18.36-.17.6,0,.25.14.49.24.71.09.19.24.4.49.4.02-.03.05-.07.07-.1.18-.24.48-.55.55-.85,0-.48-.01-.95-.02-1.43.07-.56.29-1,.42-1.52.07-.29.02-.62.12-.9.13-.37.25-.76.47-1.1.22-.24.44-.48.66-.73h.12c.26.81.29,1.68.07,2.54-.11.35-.22.71-.34,1.06-.09.52-.02.93-.24,1.37-.17.33-.42.64-.69.92-.1.09-.19.19-.29.28-.08.12-.31.68.03.68.29.08,1.03-.55,1.21-.76.17-.21.25-.48.52-.62.39-.19,1-.01,1.36.09.09.03.4.07.4.19.29,0,.58-.01.87-.02.16-.03.31-.07.47-.1v-.06h.76c.47-.27,1.45-.44,2.02-.25.13.08.27.15.4.23.35.21.54.54,1.01.54v-.06c.28-.11.57-.22.85-.33.35-.18.79-.79,1.26-.58.38.16.24.97.74.97.11-.16.29-.27.44-.38.65-.47,1.28-.67,2.17-.67.29-.02.58-.04.87-.06.29-.17.96,0,.99-.47,0-.1.04-.41-.06-.41h0Z"/>
+                          <!-- 디테일 잔상 (모자 등) -->
+                          <path class="cls-w4" d="M43.53,12.56c.17,0,.36-.03.52.04.08.03.14.1.04.14-.06.02-.56-.09-.56-.11v-.06h0Z"/>
+                          <path class="cls-w4" d="M42.31,12.44c-.28-.03-.52,0-.81-.04-.26-.08-.51-.15-.77-.23-.24-.05-.48-.09-.72-.14-.06-.03-.14-.03-.14-.12,0,.05-.74-.17-.81-.18,0-.03,0-.06,0-.08.04,0,.04-.02.08-.02.04,0,.09.03.13.05.07.02.17.09.24.09.21,0,.43-.08.65-.02.3.12.59.23.89.35.26.04.53.09.79.13.16.05.32.1.47.15v.06h0Z"/>
+                          <path class="cls-w4" d="M43.13,12.56h.06v.06c-.31-.01-.53-.02-.76-.17.15,0,.7-.05.7.12h0Z"/>
+                          <path class="cls-w4" d="M31.94,7.03c.08-.37.31-.78.77-.75.12.03.24.05.36.08.36.04.73.04,1.1.04.31-.03.61-.07.92-.1.42-.12.71-.64.93-.97.1-.15.24-.23.3-.4.06-.17,0-.37,0-.56.3-.23.63-.29,1.05-.29.25-.04.5-.08.76-.12.7.16.48,1.79.92,2.38.14.19.37.22.58.31.24.11.48.22.72.33.27.09.59.14.86.2.24.06.55.01.8.07.32.07.58.31.94.31,0,.37.07.69.02,1.04-.05.27-.14.47-.24.71-.05.27-.14.47-.24.71-.07.18.02.37,0,.57-.04.2-.09.39-.13.59-.03.1.11.41-.06.41-.24.05-.48-.04-.7-.07-.38-.05-.76-.09-1.14-.14-.49-.13-.85-.37-1.41-.37-.33-.3-1.06-.25-1.51-.3-.3-.04-.61-.15-.89-.22-.27,0-.53-.01-.79-.02-.44-.05-.93-.07-1.39-.12-.2-.03-.39-.06-.59-.09-.13.04-.27.07-.4.11-.41-.36-1.32.07-1.75-.4-.23-.26,0-.78-.01-1.11-.03-.25-.06-.5-.1-.74.03-.12.06-.24.09-.37h0Z"/>
+                          <path class="cls-w4" d="M31.75,11.03c-.41.06-.82.11-1.23.17-.39-.05-.77-.1-1.16-.15-.3-.02-.5.11-.76.12-.25,0-.48-.08-.75-.08-.02-.08-.04-.15-.06-.23.4-.09.76-.17,1.22-.17.02-.04.04-.08.06-.12.09.04.18.12.29.12,1.73,0,3.44-.07,5.17.1.58.05,1.23.04,1.74.25.07.03.17.03.17.12.34-.11.77-.08,1.09.09.16.07.33.15.49.22.17,0,.35,0,.52-.01.04,0,.11-.02.15-.01.04.01.08.06.06.1-.02.05-.13.05-.17.05-.15.03-.31.05-.46.08-.25-.06-.5-.12-.76-.18-.35-.03-.72.07-1.09.03-.23-.04-.47-.08-.7-.12-.65-.07-1.25-.05-1.86-.19-.12-.03-.23-.06-.35-.09-.17,0-.34,0-.52,0-.37-.03-.73-.07-1.1-.1h0Z"/>
+                          <!-- 실제 색상이 변경되는 마시멜로 채우기 패스 -->
+                          <path id="game-marshmallow-fill" class="cls-w2" d="M11.5,7.09c-.1.41-.1.83-.23,1.22-.15.42-.51.72-.82,1.04-.11.14-.22.29-.33.43-.46.46-1.36.93-2.09.75-.7-.17-1.2-.95-1.72-1.44-.31-.27-.63-.53-.94-.79-.32-.22-.65-.44-.97-.66-.2-.28-.4-.56-.6-.84-.11-.26-.37-1.22-.27-1.48.1-.16.2-.32.3-.48h.12c.13.31.58.7.8.2.2-.45-.07-1.12-.32-1.43-.07-.08-.1-.21-.06-.33.07-.19.23-.28.36-.44.38-.46.51-.67,1.02-1.02.94.06,1.9.23,2.72.55.15.09.3.17.44.26.22.05.44.1.66.15.69.23,1.36.97,1.79,1.57.2.28.44.43.51.79.1.48-.26,1.47-.37,1.97h0Z"/>
+                          <!-- 나무 꼬챙이 장식 -->
+                          <path class="cls-w3" d="M27.53,30.52c.08-.03.26-.23.14-.23-.17-.1-.35-.19-.52-.29-.54.16-1.28,0-1.86.08-.42.05-.83.22-1.23.29-.62.11-1.19.16-1.79.3-.27.08-.55.16-.82.24-.83.06-1.66.12-2.48.17-.29.07-.34.23-.56.4-.26.2-.85.05-.91.5-.08.61.77.43,1.16.48.43.05.72.46,1.28.46,1.02,0,1.85-.42,2.9-.42.39-.3.85-.3,1.31-.46.33-.15.66-.29,1-.44.12-.08.24-.17.37-.25.26-.1.52-.2.78-.3.17-.13.35-.27.52-.4.24-.04.47-.08.71-.12h0Z"/>
+                          <!-- 미세 외곽 및 그림자 디테일 -->
+                          <path class="cls-w3" d="M28.83,24.06c-.02-.08-.04-.15-.06-.23.1.06.35.14.35.29-.09,0-.29.04-.29-.06h0Z"/>
+                          <path class="cls-w3" d="M30.63,24.47s-.17-.12-.06-.12v-.06c.09.05.17.1.17.23-.08,0-.12.04-.12-.06h0Z"/>
+                          <!-- 우드스탁 세부 무늬들 -->
+                          <path class="cls-w5" d="M31,27.58c-.22.38-.48.69-.47,1.19,0,.37.19.63.29.94.06.19.09.39.11.59.03.38.02.77-.09,1.14-.05.15-.11.31-.22.43-.05.05-.11.1-.17.14-.06.03-.2.1-.26.08-.04-.26-.08-.56-.33-.72-.2-.13-.43-.19-.62-.34-.41-.34-.46-1.19-.38-1.73.01-.09.05-.29.15-.29-.02-.12-.04-.23-.06-.35.02-.03.35-.63.35-.64.1-.39.7-.95,1.05-1.16.32.02.59.11.72.42.04.11-.01.23-.06.31h0Z"/>
+                          <path class="cls-w5" d="M32.61,25.83c-.11.19-.47.5-.47.73h-.12c-.07-.21-.13-.43-.2-.64,0-.17,0-.34,0-.52-.04-.14-.08-.28-.12-.42-.03-.19-.05-.38-.08-.57.63.13,1.42.69.99,1.42h0Z"/>
+                          <path class="cls-w5" d="M34.52,26.56h-.12c-.06-.63-.29-1.04-.77-1.43-.13-.12-.27-.23-.4-.35-.17-.22-.14-.51-.22-.78.11.05.58.11.58.23.03.09.01.35.12.35.16.11.36.23.58.23.3-.08,1.22.58,1.22.93-.17.1-.99.64-.99.81h0Z"/>
+                          <path class="cls-w5" d="M36.62,30.75c.03-.58.21-1.06.17-1.69h.12c.05.19.09.39.13.58.03.28-.1,1.1-.42,1.1h0Z"/>
+                          <path class="cls-w5" d="M37.12,27.26c-.02.18-.11.41-.33.41v-.06c-.13-.26-.04-.53-.06-.81-.03-.18-.07-.35-.1-.53-.01-.07-.06-.11.04-.11.13-.47-.09-.62-.38-.95-.11-.14-.23-.27-.34-.41-.08-.07-.31-.18-.33-.29-.08-.04-.2-.04-.22-.15-.03-.12.15-.18.23-.23.12.09.26.25.42.27.26.02.48-.28.7-.15.27.16.42,2.54.37,3.02h0Z"/>
+                          <path class="cls-w5" d="M37.72,23.77c.03-.21.09-.35.17-.52.11.04.23.09.23.23-.12.08-.25.29-.41.29h0Z"/>
+                          <path class="cls-w5" d="M38.19,24.88c.52.24.15,1.29.36,1.77.05.06.09.12.14.17.22.2,1.06.29.81.78-.11.21-.26.31-.34.53-.07.18-.16.36-.39.36-.12-.41-.42-.72-.57-1.11-.19-.49-.33-2.07-.01-2.49h0Z"/>
+                          <!-- 테두리 장식 파츠들 -->
+                          <path class="cls-w1" d="M7.23,3.09c-.2-.1-.43-.11-.66-.12-.15.42.09.75.13,1.17.02.22-.05.44-.09.64,0,.13,0,.26,0,.39-.14.66-.69,1.23-1.31,1.47-.18.07-.35.24-.35.45.36.16.91.17,1.34.17.24-.14.53-.19.72-.44.2-.27.36-.68.41-1.02,0-.17,0-.34.01-.51.07-.18.14-.36.21-.54.13-.49.1-1.42-.4-1.67h0Z"/>
+                          <path class="cls-w1" d="M36.29,8.22c.08.11.16.21.24.32.29.17.7.33,1.04.17.62-.29.75-1.4.26-1.84-.19-.17-.48-.21-.75-.25v.06c-.34.16-.46.43-.46.81h-.06v.06c-.17-.04-.42-.29-.46-.29-.09.05-.22.1-.26.21-.11.31.29.55.46.75h0Z"/>
+                          <path class="cls-w1" d="M35.57,13.31c-.13.13-.27.22-.33.38-.15.36.15,1.12.24,1.47.03.1.06.2.09.3h.58c.23-.2.35-.38.39-.7.06-.49-.52-1.33-.98-1.45h0Z"/>
+                          <path class="cls-w1" d="M33.2,13.5c-.06.05-.11.13-.16.18-.13.13-.29.24-.37.41-.18.39,0,.67.07,1.02.05.27-.07.59.28.65.78.13.72-.7.66-1.24-.02-.2,0-.41-.03-.61-.01-.13-.08-.34-.18-.42-.11-.08-.19-.05-.27,0h0Z"/>
+                          <path class="cls-w1" d="M44.13,18.37c-.03-.16-.07-.31-.11-.47-.02-.23-.03-.46-.05-.69-.2-1.1-.88-2.33-1.95-2.79-.23.2-.43.51-.35.85.09.43.46.71.73,1.02.24.27.66.82.8,1.16.17.41.27.78.3,1.26.01.23-.15.9-.08,1.01.26.41.45-.14.69-.14-.05-.32.04-.85.01-1.22h0Z"/>
+                          <path class="cls-w1" d="M40.86,19.12c-.11.07-.25.12-.29.25-.1.29,0,1.87.16,2.1.13.19.34.17.51.3.21.16.4.34.7.24.23-.08-.07-1.26-.15-1.44-.09-.2-.28-.34-.38-.54-.17-.35-.13-.78-.55-.92h0Z"/>
+                        </svg>
+                    </div>
+                </div>
+                
+                <!-- 하단 컨트롤 영역 -->
+                <div class="w-full flex justify-between items-center z-10 px-2">
+                    <span id="roast-status" class="text-[11px] font-bold text-white bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700">🍢 굽기 대기 중</span>
+                    <button id="roast-btn" class="bg-amber-500 hover:bg-amber-600 text-white font-black py-1.5 px-5 rounded-full text-xs shadow-md active:scale-95 transition-all">🔥 굽기 시작!</button>
+                </div>
+            </div>
+        `;
+
+        const roastBtn = gameWrapper.querySelector('#roast-btn');
+        const roastStatus = gameWrapper.querySelector('#roast-status');
+        const woodstockWrapper = gameWrapper.querySelector('#woodstock-wrapper');
+        const marshmallowFill = gameWrapper.querySelector('#game-marshmallow-fill');
+
+        let isRoasting = false;
+        let timeElapsed = 0;
+        let gameTimer = null;
+
+        roastBtn.onclick = () => {
+            if (!isRoasting) {
+                // 굽기 타이머 개시
+                isRoasting = true;
+                roastBtn.innerText = "🍢 지금 꺼내기!";
+                roastBtn.className = "bg-red-500 hover:bg-red-600 text-white font-black py-1.5 px-5 rounded-full text-xs shadow-md active:scale-95 transition-all";
+                
+                // 우드스탁 캐릭터가 모닥불로 가까이 물리적으로 이동
+                woodstockWrapper.style.transform = "translateX(-45px) translateY(-5px)";
+                
+                // 우드스탁 댄스 활성화
+                woodstockWrapper.classList.add('anim-woodstock-dance');
+
+                timeElapsed = 0;
+                gameTimer = setInterval(() => {
+                    timeElapsed += 100;
+                    
+                    if (timeElapsed < 1500) {
+                        // 설익은 구간 (Marshmallow remains white)
+                        marshmallowFill.style.fill = "#ffffff";
+                        roastStatus.innerHTML = "🍢 덜 익어가는 중...";
+                        roastStatus.className = "text-[11px] font-bold text-white bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700";
+                    } else if (timeElapsed >= 1500 && timeElapsed <= 3000) {
+                        // 노릇노릇 완벽한 구간 (Turns Golden Brown #dfb36e)
+                        marshmallowFill.style.fill = "#dfb36e";
+                        roastStatus.innerHTML = "💛 노릇노릇! (터치!)";
+                        roastStatus.className = "text-[11px] font-bold text-yellow-900 bg-yellow-100 px-3 py-1.5 rounded-xl border border-yellow-300 animate-pulse";
+                    } else {
+                        // 새까맣게 타는 구간 (Turns Burnt Gray #333333)
+                        marshmallowFill.style.fill = "#333333";
+                        roastStatus.innerHTML = "🔥 타는 중! 😭";
+                        roastStatus.className = "text-[11px] font-bold text-red-100 bg-red-800 px-3 py-1.5 rounded-xl border border-red-950";
+                        
+                        // 우드스탁이 패닉 상태로 바뀜
+                        woodstockWrapper.classList.remove('anim-woodstock-dance');
+                        woodstockWrapper.classList.add('anim-woodstock-panic');
+                    }
+                    
+                    // 4.5초가 초과하면 자동 종료 및 실패
+                    if (timeElapsed >= 4500) {
+                        stopRoasting();
+                    }
+                }, 100);
+            } else {
+                stopRoasting();
+            }
+        };
+
+        function stopRoasting() {
+            clearInterval(gameTimer);
+            isRoasting = false;
+            
+            // 우드스탁을 뒤로 회수
+            woodstockWrapper.style.transform = "none";
+            
+            // 우드스탁 애니메이션 초기화
+            woodstockWrapper.classList.remove('anim-woodstock-dance', 'anim-woodstock-panic');
+
+            // 굽기 결과 판정
+            if (timeElapsed >= 1500 && timeElapsed <= 3000) {
+                // 성공!
+                woodstockWrapper.classList.add('anim-woodstock-dance'); // 승리 댄스
+                roastBtn.disabled = true;
+                showMissionSuccess();
+            } else {
+                // 실패
+                if (timeElapsed < 1500) {
+                    showToast("마시멜로가 아직 설익었어요! 🍢 더 구워보세요.", "error");
+                } else {
+                    showToast("마시멜로가 새까맣게 탔어요! 😭 다시 시도하세요.", "error");
+                }
+                
+                woodstockWrapper.classList.add('anim-woodstock-panic'); // 절망하는 모션
+                roastBtn.disabled = true;
+                
+                // 1.5초 후 초기화 재시도
+                setTimeout(() => {
+                    if (currentSpotIndex === 1) { 
+                        container.innerHTML = '';
+                        initTimingTap(mission, container);
+                    }
+                }, 1500);
+            }
+        }
+    }
+
+    function initGraffitiEraser(mission, container) {
+        const wrapper = document.createElement('div');
+        wrapper.className = "relative w-full h-[180px] bg-amber-50 rounded-2xl overflow-hidden shadow-inner flex flex-col justify-between p-3 select-none border border-amber-100/60";
+        container.appendChild(wrapper);
+
+        // 1. 뒤에 숨겨질 긍정 문장 레이어
+        const secretDiv = document.createElement('div');
+        secretDiv.className = "absolute inset-0 flex flex-col items-center justify-center p-4 text-center z-0";
+        secretDiv.innerHTML = `
+            <span class="text-3xl mb-1 select-none animate-[pulse-soft_1.5s_infinite]">🌸</span>
+            <h4 class="text-sm font-black text-amber-800 break-keep">"Sir, 괜찮아요. 우리는 함께니까!"</h4>
+            <p class="text-[10px] text-amber-600 font-bold mt-1 bg-amber-100/70 border border-amber-200/50 px-2 py-0.5 rounded-full select-none">✨ 우정의 힘! Joy 발견 ✨</p>
+        `;
+        wrapper.appendChild(secretDiv);
+
+        // 2. 앞에 덮을 Canvas 레이어
+        const canvas = document.createElement('canvas');
+        canvas.className = "absolute inset-0 w-full h-full z-10 cursor-pointer touch-none";
+        wrapper.appendChild(canvas);
+
+        // Canvas 실제 크기 픽셀 매칭
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width || 380;
+        canvas.height = 180;
+
+        const ctx = canvas.getContext('2d');
+
+        // 벽돌 느낌의 불투명 덮개 그리기 (딥 앰버 브라운)
+        ctx.fillStyle = '#78350f';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 가로 분필 질감이나 점박이 데코
+        ctx.fillStyle = '#b45309';
+        for (let i = 0; i < canvas.width; i += 20) {
+            ctx.fillRect(i, 0, 1, canvas.height);
+        }
+        for (let i = 0; i < canvas.height; i += 15) {
+            ctx.fillRect(0, i, canvas.width, 1);
+        }
+
+        // 부정적인 낙서 텍스트 그리기
+        ctx.fillStyle = 'rgba(254, 243, 199, 0.85)';
+        ctx.font = '900 16px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        const words = [
+            { text: '❌ 불안', x: canvas.width * 0.25, y: 40 },
+            { text: '❌ 실패', x: canvas.width * 0.75, y: 45 },
+            { text: '❌ 걱정', x: canvas.width * 0.5, y: 90 },
+            { text: '❌ 외로움', x: canvas.width * 0.2, y: 140 },
+            { text: '❌ 한계', x: canvas.width * 0.8, y: 135 }
+        ];
+
+        words.forEach(w => {
+            ctx.fillText(w.text, w.x, w.y);
+        });
+
+        let isDrawing = false;
+        let gameActive = true;
+
+        function getCoords(e) {
+            const r = canvas.getBoundingClientRect();
+            let clientX, clientY;
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            return {
+                x: (clientX - r.left) * (canvas.width / r.width),
+                y: (clientY - r.top) * (canvas.height / r.height)
+            };
+        }
+
+        function erase(e) {
+            if (!isDrawing || !gameActive) return;
+            const coords = getCoords(e);
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(coords.x, coords.y, 22, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function startErase(e) {
+            if (!gameActive) return;
+            isDrawing = true;
+            erase(e);
+        }
+
+        function stopErase() {
+            if (!isDrawing) return;
+            isDrawing = false;
+            checkWin();
+        }
+
+        // 마우스 이벤트
+        canvas.addEventListener('mousedown', startErase);
+        canvas.addEventListener('mousemove', erase);
+        window.addEventListener('mouseup', stopErase);
+
+        // 터치 이벤트
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            startErase(e);
+        });
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            erase(e);
+        });
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            stopErase();
+        });
+
+        function checkWin() {
+            if (!gameActive) return;
+            
+            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imgData.data;
+            let transparentPixels = 0;
+            const totalSample = 120;
+            
+            for (let i = 0; i < totalSample; i++) {
+                const index = Math.floor(Math.random() * (data.length / 4)) * 4;
+                if (data[index + 3] < 10) {
+                    transparentPixels++;
+                }
+            }
+
+            const ratio = transparentPixels / totalSample;
+            if (ratio >= 0.70) {
+                gameActive = false;
+                canvas.style.transition = "opacity 600ms ease-out";
+                canvas.style.opacity = "0";
+                
+                showToast("✨ 마음의 낙서를 깨끗하게 지웠습니다! Joy 발견 ✨", "success");
+                
+                setTimeout(() => {
+                    canvas.remove();
+                    showMissionSuccess();
+                }, 1000);
+            }
+        }
+    }
+
+    function initBaseballSwing(mission, container) {
+        const gameArea = document.createElement('div');
+        gameArea.className = "relative w-full h-[180px] bg-green-800 rounded-2xl overflow-hidden flex flex-col justify-between p-3 select-none";
+        container.appendChild(gameArea);
+
+        gameArea.innerHTML = `
+            <div class="absolute inset-0 bg-gradient-to-b from-green-900 to-green-700 pointer-events-none"></div>
+            <div class="absolute -bottom-16 left-1/2 -translate-x-1/2 w-48 h-48 bg-amber-800 rounded-full opacity-60 pointer-events-none"></div>
+            <div id="batting-target" class="absolute bottom-6 left-1/2 -translate-x-1/2 w-10 h-10 border-2 border-dashed border-white rounded-full flex items-center justify-center pointer-events-none transition-colors duration-200">
+                <div class="w-6 h-6 bg-white bg-opacity-20 rounded-full"></div>
+            </div>
+            <div class="absolute top-8 left-1/2 -translate-x-1/2 w-8 h-4 bg-amber-700 rounded-full opacity-80 pointer-events-none"></div>
+            
+            <div id="game-baseball" class="absolute w-5 h-5 bg-white border border-gray-400 rounded-full shadow-md flex items-center justify-center text-[8px] pointer-events-none font-bold" style="left: calc(50% - 10px); top: 32px; transform: scale(0.6);">⚾</div>
+            
+            <div class="w-full flex justify-between items-center z-10 px-2 mt-auto">
+                <span id="baseball-status" class="text-[11px] font-bold text-white bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700">⚾ 대기 중...</span>
+                <button id="swing-btn" class="bg-red-500 hover:bg-red-600 text-white font-black py-1.5 px-5 rounded-full text-xs shadow-md active:scale-95 transition-all">⚾ 휘두르기!</button>
+            </div>
+        `;
+
+        const baseball = gameArea.querySelector('#game-baseball');
+        const swingBtn = gameArea.querySelector('#swing-btn');
+        const statusText = gameArea.querySelector('#baseball-status');
+        const targetZone = gameArea.querySelector('#batting-target');
+
+        let isPitching = false;
+        let pitchTimer = null;
+        let currentTop = 32;
+        let currentScale = 0.6;
+
+        swingBtn.onclick = () => {
+            if (!isPitching) {
+                isPitching = true;
+                swingBtn.innerText = "⚾ 타격!";
+                swingBtn.className = "bg-amber-500 hover:bg-amber-600 text-white font-black py-1.5 px-5 rounded-full text-xs shadow-md active:scale-95 transition-all";
+                statusText.innerText = "⚾ 공이 날아옵니다!!";
+                
+                currentTop = 32;
+                currentScale = 0.6;
+                baseball.style.left = "calc(50% - 10px)";
+                baseball.style.top = currentTop + "px";
+                baseball.style.transform = `scale(${currentScale})`;
+
+                pitchTimer = setInterval(() => {
+                    currentTop += 8;
+                    currentScale += 0.05;
+                    baseball.style.top = currentTop + "px";
+                    baseball.style.transform = `scale(${currentScale})`;
+                    
+                    if (currentTop >= 115 && currentTop <= 135) {
+                        targetZone.className = "absolute bottom-6 left-1/2 -translate-x-1/2 w-10 h-10 border-4 border-yellow-300 bg-yellow-300 bg-opacity-20 rounded-full flex items-center justify-center pointer-events-none transition-colors duration-100";
+                    } else {
+                        targetZone.className = "absolute bottom-6 left-1/2 -translate-x-1/2 w-10 h-10 border-2 border-dashed border-white rounded-full flex items-center justify-center pointer-events-none transition-colors duration-200";
+                    }
+
+                    if (currentTop >= 160) {
+                        clearInterval(pitchTimer);
+                        statusText.innerText = "❌ 스트라이크 아웃!";
+                        statusText.className = "text-[11px] font-bold text-red-200 bg-red-800 px-3 py-1.5 rounded-xl border border-red-950";
+                        showToast("공을 치지 못했습니다! ⚾ 다시 타이밍을 맞춰보세요.", "error");
+                        resetPitch();
+                    }
+                }, 40);
+            } else {
+                clearInterval(pitchTimer);
+                isPitching = false;
+                
+                if (currentTop >= 110 && currentTop <= 142) {
+                    statusText.innerText = "🎉 홈런!!! ⚾";
+                    statusText.className = "text-[11px] font-bold text-green-900 bg-green-100 px-3 py-1.5 rounded-xl border border-green-300 animate-bounce";
+                    
+                    baseball.style.transition = "all 0.5s ease-out";
+                    baseball.style.top = "-50px";
+                    baseball.style.left = "80%";
+                    baseball.style.transform = "scale(0.2)";
+                    
+                    swingBtn.disabled = true;
+                    showMissionSuccess();
+                } else {
+                    statusText.innerText = "❌ 헛스윙! 스트라이크!";
+                    statusText.className = "text-[11px] font-bold text-red-200 bg-red-800 px-3 py-1.5 rounded-xl border border-red-950";
+                    showToast("타이밍이 맞지 않았습니다! ⚾", "error");
+                    resetPitch();
+                }
+            }
+        };
+
+        function resetPitch() {
+            swingBtn.disabled = true;
+            setTimeout(() => {
+                if (currentSpotIndex === 3) {
+                    isPitching = false;
+                    swingBtn.disabled = false;
+                    swingBtn.innerText = "⚾ 다시 던지기!";
+                    swingBtn.className = "bg-red-500 hover:bg-red-600 text-white font-black py-1.5 px-5 rounded-full text-xs shadow-md active:scale-95 transition-all";
+                    baseball.style.transition = "none";
+                    baseball.style.left = "calc(50% - 10px)";
+                    baseball.style.top = "32px";
+                    baseball.style.transform = "scale(0.6)";
+                }
+            }, 1200);
+        }
+    }
+
+    function initMemoryMatch(mission, container) {
+        const grid = document.createElement('div');
+        grid.className = "grid grid-cols-2 gap-3 w-full max-w-[200px] mx-auto py-2 select-none";
+        container.appendChild(grid);
+
+        let cardsData = [
+            { id: 1, text: "🌸 핑크", matchId: 1 },
+            { id: 2, text: "🌸 핑크", matchId: 1 },
+            { id: 3, text: "🍀 그린", matchId: 2 },
+            { id: 4, text: "🍀 그린", matchId: 2 }
+        ];
+        cardsData.sort(() => Math.random() - 0.5);
+
+        let flippedCards = [];
+        let matchedCount = 0;
+
+        cardsData.forEach((data, index) => {
+            const card = document.createElement('button');
+            card.className = "h-20 bg-slate-100 hover:bg-slate-200 border-2 border-slate-200 rounded-2xl flex items-center justify-center font-black text-xs text-slate-400 active:scale-95 transition-all shadow-sm";
+            card.innerHTML = "🐾<br>Peanuts";
+            
+            card.onclick = () => {
+                if (flippedCards.length < 2 && !flippedCards.includes(card) && !card.disabled) {
+                    card.className = data.matchId === 1 
+                        ? "h-20 bg-pink-100 border-2 border-pink-400 rounded-2xl flex items-center justify-center font-black text-sm text-pink-700 transition-all shadow-md animate-[pulse-soft_0.5s]" 
+                        : "h-20 bg-green-100 border-2 border-green-400 rounded-2xl flex items-center justify-center font-black text-sm text-green-700 transition-all shadow-md animate-[pulse-soft_0.5s]";
+                    card.innerText = data.text;
+                    flippedCards.push({ card, data });
+
+                    if (flippedCards.length === 2) {
+                        if (flippedCards[0].data.matchId === flippedCards[1].data.matchId) {
+                            flippedCards[0].card.disabled = true;
+                            flippedCards[1].card.disabled = true;
+                            flippedCards = [];
+                            matchedCount += 2;
+                            if (matchedCount === 4) {
+                                showMissionSuccess();
+                            }
+                        } else {
+                            setTimeout(() => {
+                                flippedCards[0].card.className = "h-20 bg-slate-100 border-2 border-slate-200 rounded-2xl flex items-center justify-center font-black text-xs text-slate-400 active:scale-95 transition-all shadow-sm";
+                                flippedCards[0].card.innerHTML = "🐾<br>Peanuts";
+                                flippedCards[1].card.className = "h-20 bg-slate-100 border-2 border-slate-200 rounded-2xl flex items-center justify-center font-black text-xs text-slate-400 active:scale-95 transition-all shadow-sm";
+                                flippedCards[1].card.innerHTML = "🐾<br>Peanuts";
+                                flippedCards = [];
+                            }, 1000);
+                        }
+                    }
+                }
+            };
+            grid.appendChild(card);
+        });
+    }
+
+    function initSnoopyDressUp(mission, container) {
+        const wrapper = document.createElement('div');
+        wrapper.className = "w-full flex flex-col items-center select-none";
+        container.appendChild(wrapper);
+
+        wrapper.innerHTML = `
+            <div class="relative w-full h-[130px] bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center mb-4 overflow-hidden">
+                <div class="relative w-20 h-20 bg-white border border-gray-200 rounded-full flex flex-col items-center justify-center shadow-sm">
+                    <div class="absolute w-5 h-4 bg-black rounded-full left-0 top-1/2 -translate-y-1/2"></div>
+                    <div class="absolute w-2.5 h-3 bg-black rounded-full right-8 top-6"></div>
+                    <div class="absolute w-6 h-12 bg-black rounded-full -right-1 top-2 origin-top rotate-12"></div>
+                    <div id="cool-sunglasses" class="absolute w-14 h-5 bg-black rounded-full right-4 top-6 opacity-0 scale-50 transition-all duration-500 shadow-md flex items-center justify-between px-1">
+                        <div class="w-5 h-4 bg-gray-900 rounded-full"></div>
+                        <div class="w-5 h-4 bg-gray-900 rounded-full"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="text-xs text-gray-500 mb-3 text-center">스누피의 선글라스를 찾아 멋진 조 쿨(Joe Cool)로 만드세요!</p>
+            
+            <div class="flex gap-2 justify-center w-full">
+                <button id="item-goggles" class="bg-white border border-slate-200 text-slate-700 px-3 py-2 rounded-xl text-xs font-semibold hover:border-gray-400 active:scale-95 transition-all shadow-sm">비행 고글</button>
+                <button id="item-glasses" class="bg-amber-400 border border-amber-500 text-amber-900 px-3 py-2 rounded-xl text-xs font-bold hover:border-gray-900 active:scale-95 transition-all shadow-sm">🕶️ 멋쟁이 선글라스</button>
+                <button id="item-blanket" class="bg-white border border-slate-200 text-slate-700 px-3 py-2 rounded-xl text-xs font-semibold hover:border-gray-400 active:scale-95 transition-all shadow-sm">애착 담요</button>
+            </div>
+        `;
+
+        const sunglasses = wrapper.querySelector('#cool-sunglasses');
+        const btnGoggles = wrapper.querySelector('#item-goggles');
+        const btnGlasses = wrapper.querySelector('#item-glasses');
+        const btnBlanket = wrapper.querySelector('#item-blanket');
+
+        btnGlasses.onclick = () => {
+            sunglasses.className = "absolute w-14 h-5 bg-black rounded-full right-4 top-6 opacity-100 scale-100 transition-all duration-500 shadow-md flex items-center justify-between px-1";
+            btnGoggles.disabled = true;
+            btnGlasses.disabled = true;
+            btnBlanket.disabled = true;
+            
+            showToast("🕶️ 조 쿨 변신 완료! 너무 멋져요! ✨", "success");
+            showMissionSuccess();
+        };
+
+        btnGoggles.onclick = () => {
+            showToast("그건 비행사 스누피(Flying Ace)의 아이템이에요! 🛩️", "error");
+        };
+
+        btnBlanket.onclick = () => {
+            showToast("그건 라이너스의 애착 담요예요! 🧣", "error");
+        };
+    }
+
+    function initWhackAPumpkin(mission, container) {
+        const grid = document.createElement('div');
+        grid.className = "flex gap-4 justify-center py-4 w-full select-none";
+        container.appendChild(grid);
+
+        grid.innerHTML = `
+            <div id="hole-0" class="w-16 h-16 bg-amber-900 bg-opacity-20 border-2 border-dashed border-amber-800 rounded-full flex items-center justify-center relative cursor-pointer">
+                <span class="pumpkin-item text-4xl hidden transition-all duration-150 transform scale-75">🎃</span>
+            </div>
+            <div id="hole-1" class="w-16 h-16 bg-amber-900 bg-opacity-20 border-2 border-dashed border-amber-800 rounded-full flex items-center justify-center relative cursor-pointer">
+                <span class="pumpkin-item text-4xl hidden transition-all duration-150 transform scale-75">🎃</span>
+            </div>
+            <div id="hole-2" class="w-16 h-16 bg-amber-900 bg-opacity-20 border-2 border-dashed border-amber-800 rounded-full flex items-center justify-center relative cursor-pointer">
+                <span class="pumpkin-item text-4xl hidden transition-all duration-150 transform scale-75">🎃</span>
+            </div>
+        `;
+
+        const holes = [
+            grid.querySelector('#hole-0'),
+            grid.querySelector('#hole-1'),
+            grid.querySelector('#hole-2')
+        ];
+
+        let activeHole = -1;
+        let isGolden = false;
+        let gameActive = true;
+        let pumpkinTimer = null;
+
+        function pop() {
+            if (!gameActive) return;
+
+            holes.forEach(h => {
+                const item = h.querySelector('.pumpkin-item');
+                item.classList.add('hidden');
+                item.style.transform = "scale(0.75)";
+                item.innerText = "🎃";
+            });
+
+            activeHole = Math.floor(Math.random() * 3);
+            isGolden = Math.random() > 0.4;
+
+            const activeItem = holes[activeHole].querySelector('.pumpkin-item');
+            if (isGolden) {
+                activeItem.innerText = "🌟";
+            } else {
+                activeItem.innerText = "🎃";
+            }
+            activeItem.classList.remove('hidden');
+            setTimeout(() => {
+                activeItem.style.transform = "scale(1.1)";
+            }, 10);
+
+            pumpkinTimer = setTimeout(pop, 800 + Math.random() * 500);
+        }
+
+        holes.forEach((hole, idx) => {
+            hole.onclick = () => {
+                if (!gameActive) return;
+                if (idx === activeHole && isGolden) {
+                    gameActive = false;
+                    clearTimeout(pumpkinTimer);
+                    
+                    const item = hole.querySelector('.pumpkin-item');
+                    item.innerText = "👑";
+                    item.style.transform = "scale(1.3) rotate(360deg)";
+                    item.style.transition = "all 0.5s ease";
+                    
+                    showToast("🌟 호박대왕을 찾았습니다! 라이너스가 기뻐합니다. 🎃", "success");
+                    showMissionSuccess();
+                } else if (idx === activeHole && !isGolden) {
+                    showToast("이건 일반 호박이에요! 황금빛 호박대왕(🌟)을 찾아 탭하세요!", "info");
+                }
+            };
+        });
+
+        pop();
+    }
+
+    function initTugOfWar(mission, container) {
+        const gameArea = document.createElement('div');
+        gameArea.className = "w-full flex flex-col items-center select-none py-2";
+        container.appendChild(gameArea);
+
+        gameArea.innerHTML = `
+            <div class="w-full h-8 bg-slate-100 rounded-full border border-slate-200 relative overflow-hidden flex items-center justify-between px-3 shadow-inner mb-4">
+                <span class="text-xs font-bold text-gray-400 z-10">스누피 🐶</span>
+                <span class="text-xs font-bold text-gray-400 z-10">🧣 라이너스</span>
+                
+                <div id="tug-bar" class="absolute top-0 bottom-0 bg-blue-300 w-[10px] shadow-md border-x border-blue-400 rounded transition-all duration-100" style="left: 50%;"></div>
+            </div>
+            
+            <p class="text-xs text-gray-500 mb-4 text-center">담요를 가져가려는 스누피에 맞서 <b>[잡아당기기]</b>를 마구 클릭해 담요를 지키세요!</p>
+            
+            <button id="pull-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-black py-2 px-8 rounded-full text-xs shadow-md active:scale-95 transition-all">🧣 잡아당기기!</button>
+        `;
+
+        const tugBar = gameArea.querySelector('#tug-bar');
+        const pullBtn = gameArea.querySelector('#pull-btn');
+
+        let progress = 50;
+        let gameActive = true;
+
+        const gameInterval = setInterval(() => {
+            if (!gameActive) {
+                clearInterval(gameInterval);
+                return;
+            }
+            progress = Math.max(0, progress - 2);
+            tugBar.style.left = progress + "%";
+
+            if (progress <= 5) {
+                showToast("스누피가 담요를 끌고 도망갔어요! 🐶 다시 시도해보세요.", "error");
+                progress = 50;
+            }
+        }, 100);
+
+        pullBtn.onclick = () => {
+            if (!gameActive) return;
+            progress = Math.min(100, progress + 8);
+            tugBar.style.left = progress + "%";
+
+            if (progress >= 90) {
+                gameActive = false;
+                clearInterval(gameInterval);
+                pullBtn.disabled = true;
+                showToast("🧣 담요를 안전하게 라이너스 품으로 지켰습니다! 🎉", "success");
+                showMissionSuccess();
+            }
+        };
+    }
+
+    function initFindWoodstock(mission, container) {
+        const grid = document.createElement('div');
+        grid.className = "flex gap-4 justify-center py-4 w-full select-none";
+        container.appendChild(grid);
+
+        grid.innerHTML = `
+            <div id="nest-0" class="w-16 h-16 bg-amber-100 border border-amber-300 rounded-2xl flex flex-col items-center justify-center cursor-pointer shadow-sm active:scale-95 transition-transform">
+                <span class="text-4xl nest-content">🪹</span>
+                <span class="text-[9px] text-amber-700 mt-1 font-semibold">둥지 A</span>
+            </div>
+            <div id="nest-1" class="w-16 h-16 bg-amber-100 border border-amber-300 rounded-2xl flex flex-col items-center justify-center cursor-pointer shadow-sm active:scale-95 transition-transform">
+                <span class="text-4xl nest-content">🪹</span>
+                <span class="text-[9px] text-amber-700 mt-1 font-semibold">둥지 B</span>
+            </div>
+            <div id="nest-2" class="w-16 h-16 bg-amber-100 border border-amber-300 rounded-2xl flex flex-col items-center justify-center cursor-pointer shadow-sm active:scale-95 transition-transform">
+                <span class="text-4xl nest-content">🪹</span>
+                <span class="text-[9px] text-amber-700 mt-1 font-semibold">둥지 C</span>
+            </div>
+        `;
+
+        const nests = [
+            grid.querySelector('#nest-0'),
+            grid.querySelector('#nest-1'),
+            grid.querySelector('#nest-2')
+        ];
+
+        const woodstockIndex = Math.floor(Math.random() * 3);
+        let gameActive = true;
+
+        nests.forEach((nest, idx) => {
+            nest.onclick = () => {
+                if (!gameActive) return;
+                const content = nest.querySelector('.nest-content');
+
+                if (idx === woodstockIndex) {
+                    gameActive = false;
+                    content.innerText = "🐥";
+                    nest.className = "w-16 h-16 bg-yellow-100 border-2 border-yellow-400 rounded-2xl flex flex-col items-center justify-center shadow-md animate-bounce";
+                    showToast("🐥 우드스탁 발견! 삐약삐약 기뻐하며 지저귑니다. 💕", "success");
+                    showMissionSuccess();
+                } else {
+                    content.innerText = "🍃";
+                    showToast("비어 있는 둥지네요! 다른 둥지를 확인해보세요. 🐾", "info");
+                }
+            };
+        });
+    }
+
+    function initStoneSkip(mission, container) {
+        const gameArea = document.createElement('div');
+        gameArea.className = "w-full flex flex-col items-center select-none py-2";
+        container.appendChild(gameArea);
+
+        gameArea.innerHTML = `
+            <div class="relative w-full h-[110px] bg-sky-200 border border-sky-300 rounded-2xl flex items-center justify-center mb-4 overflow-hidden shadow-inner">
+                <div id="ripple-area" class="absolute inset-0 flex items-center justify-around px-8 pointer-events-none">
+                    <div class="ripple-ring w-8 h-8 rounded-full border-2 border-sky-400 opacity-0 transition-opacity"></div>
+                    <div class="ripple-ring w-8 h-8 rounded-full border-2 border-sky-400 opacity-0 transition-opacity" style="transition-delay: 200ms;"></div>
+                    <div class="ripple-ring w-8 h-8 rounded-full border-2 border-sky-400 opacity-0 transition-opacity" style="transition-delay: 400ms;"></div>
+                </div>
+                <div id="skip-stone" class="absolute w-5 h-4 bg-slate-500 rounded-full left-4 bottom-4 transition-all duration-[600ms] ease-out pointer-events-none shadow-md"></div>
+                
+                <span id="lake-text" class="text-xs font-bold text-sky-800 relative z-10 bg-white bg-opacity-60 px-3 py-1 rounded-full">🪨 물수제비를 던지세요!</span>
+            </div>
+
+            <div class="w-full h-4 bg-slate-100 border border-slate-200 rounded-full relative overflow-hidden mb-4 shadow-inner">
+                <div class="absolute top-0 bottom-0 bg-yellow-400 opacity-55" style="left: 75%; width: 20%;"></div>
+                <div id="gauge-pointer" class="absolute top-0 bottom-0 w-1.5 bg-red-500 transition-all" style="left: 0%;"></div>
+            </div>
+
+            <button id="skip-btn" class="bg-sky-600 hover:bg-sky-700 text-white font-black py-2 px-8 rounded-full text-xs shadow-md active:scale-95 transition-all">🪨 던지기!</button>
+        `;
+
+        const skipBtn = gameArea.querySelector('#skip-btn');
+        const gaugePointer = gameArea.querySelector('#gauge-pointer');
+        const stone = gameArea.querySelector('#skip-stone');
+        const rippleRings = gameArea.querySelectorAll('.ripple-ring');
+        const lakeText = gameArea.querySelector('#lake-text');
+
+        let active = true;
+        let position = 0;
+        let direction = 1;
+        let animId = null;
+
+        function loop() {
+            if (!active) return;
+            position += direction * 3;
+            if (position >= 100) {
+                position = 100;
+                direction = -1;
+            } else if (position <= 0) {
+                position = 0;
+                direction = 1;
+            }
+            gaugePointer.style.left = position + "%";
+            animId = requestAnimationFrame(loop);
+        }
+
+        skipBtn.onclick = () => {
+            if (!active) return;
+            active = false;
+            cancelAnimationFrame(animId);
+
+            if (position >= 75 && position <= 95) {
+                lakeText.innerText = "퐁! 퐁! 퐁! 성공!! 🪨";
+                
+                stone.style.transition = "all 600ms cubic-bezier(0.25, 1, 0.5, 1)";
+                stone.style.left = "80%";
+                stone.style.bottom = "30px";
+                
+                setTimeout(() => {
+                    rippleRings.forEach(ring => {
+                        ring.classList.remove('opacity-0');
+                        ring.classList.add('opacity-100', 'animate-ping');
+                    });
+                }, 150);
+
+                skipBtn.disabled = true;
+                showMissionSuccess();
+            } else {
+                lakeText.innerText = "첨벙! 돌이 물에 빠졌어요. 😭";
+                stone.style.transition = "all 300ms ease-in";
+                stone.style.left = "40%";
+                stone.style.bottom = "8px";
+                
+                showToast("파워 게이지가 노란색 영역에 맞을 때 던지세요!", "error");
+                
+                setTimeout(() => {
+                    if (currentSpotIndex === 9) {
+                        gameArea.innerHTML = '';
+                        initStoneSkip(mission, gameArea);
+                    }
+                }, 1500);
+            }
+        };
+
+        loop();
+    }
+
+    function initWaterSprout(mission, container) {
+        const gameArea = document.createElement('div');
+        gameArea.className = "w-full flex flex-col items-center select-none py-2";
+        container.appendChild(gameArea);
+
+        gameArea.innerHTML = `
+            <div class="relative w-full h-[120px] bg-amber-50 border border-amber-100 rounded-2xl flex flex-col items-center justify-end pb-3 mb-4 overflow-hidden">
+                <svg id="flower-graphics" class="w-16 h-16 transition-all duration-300 transform scale-75" viewBox="0 0 100 100">
+                    <path d="M50,90 Q48,70 50,55" stroke="#16A34A" stroke-width="6" fill="none" stroke-linecap="round"/>
+                    <path id="leaf-left" class="opacity-0 transition-opacity duration-300" d="M48,75 Q38,70 45,65 Q50,70 48,75" fill="#16A34A"/>
+                    <path id="leaf-right" class="opacity-0 transition-opacity duration-300" d="M52,70 Q62,65 55,60 Q50,65 52,70" fill="#16A34A"/>
+                    <circle id="sprout-bud" cx="50" cy="53" r="5" fill="#15803D"/>
+                    <g id="flower-petals" class="opacity-0 transition-all duration-500 scale-50 origin-center" style="transform-origin: 50px 50px;">
+                        <circle cx="50" cy="40" r="10" fill="#EF4444"/>
+                        <circle cx="50" cy="66" r="10" fill="#EF4444"/>
+                        <circle cx="37" cy="53" r="10" fill="#EF4444"/>
+                        <circle cx="63" cy="53" r="10" fill="#EF4444"/>
+                        <circle cx="50" cy="53" r="8" fill="#FBBF24"/>
+                    </g>
+                </svg>
+                
+                <span id="flower-status" class="text-[10px] font-bold text-emerald-800 bg-emerald-100 border border-emerald-200 px-2.5 py-0.5 rounded-full mt-2">🌱 새싹에 물을 주세요 (0/4)</span>
+            </div>
+
+            <button id="water-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2 px-8 rounded-full text-xs shadow-md active:scale-95 transition-all">🌧️ 물 뿌리기!</button>
+        `;
+
+        const waterBtn = gameArea.querySelector('#water-btn');
+        const statusText = gameArea.querySelector('#flower-status');
+        const flowerSvg = gameArea.querySelector('#flower-graphics');
+        const leafLeft = gameArea.querySelector('#leaf-left');
+        const leafRight = gameArea.querySelector('#leaf-right');
+        const sproutBud = gameArea.querySelector('#sprout-bud');
+        const flowerPetals = gameArea.querySelector('#flower-petals');
+
+        let waterCount = 0;
+
+        waterBtn.onclick = () => {
+            waterCount++;
+            
+            flowerSvg.className = "w-16 h-16 transition-all duration-300 transform scale-75 animate-[dance_0.3s]";
+            setTimeout(() => {
+                flowerSvg.classList.remove('animate-[dance_0.3s]');
+            }, 300);
+
+            if (waterCount === 1) {
+                leafLeft.classList.remove('opacity-0');
+                statusText.innerText = "🌱 이파리가 돋아납니다 (1/4)";
+            } else if (waterCount === 2) {
+                leafRight.classList.remove('opacity-0');
+                sproutBud.setAttribute('r', '8');
+                sproutBud.setAttribute('fill', '#EA580C');
+                statusText.innerText = "🍊 꽃망울이 맺혔습니다 (2/4)";
+            } else if (waterCount === 3) {
+                statusText.innerText = "🌸 곧 꽃이 필 것 같아요! (3/4)";
+            } else if (waterCount >= 4) {
+                sproutBud.setAttribute('opacity', '0');
+                flowerPetals.classList.remove('opacity-0');
+                flowerPetals.style.transform = "scale(1)";
+                statusText.innerText = "🌸 예쁜 꽃이 만개했습니다! (완료)";
+                statusText.className = "text-[10px] font-bold text-pink-800 bg-pink-100 border border-pink-200 px-2.5 py-0.5 rounded-full mt-2";
+                
+                waterBtn.disabled = true;
+                showToast("🌸 꽃이 활짝 피었습니다! 루시가 기쁜 미소를 짓습니다. 🌱", "success");
+                showMissionSuccess();
+            }
+        };
+    }
+
+    function showMissionSuccess() {
+        let clearedMissions = JSON.parse(localStorage.getItem('snoopyClearedMissions') || '{}');
+        clearedMissions[currentSpotIndex] = true;
+        localStorage.setItem('snoopyClearedMissions', JSON.stringify(clearedMissions));
+        
+        showToast("🎉 미션 성공! 스누피의 해설을 해제했습니다. 🐾", "success");
+        
+        const gameContainer = document.getElementById('game-container');
+        gameContainer.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-4 text-center">
+                <span class="text-5xl animate-[pulse-soft_1s_infinite] mb-2">🎉</span>
+                <h4 class="text-sm font-bold text-green-600 mb-1">Mission Cleared!</h4>
+                <p class="text-xs text-gray-500">잠겨있던 에피소드가 해제되었습니다.</p>
+            </div>
+        `;
+        
+        setTimeout(() => {
+            document.getElementById('mission-zone').classList.add('hidden');
+            interactionZone.style.display = 'flex';
+            revealStory();
+        }, 1500);
+    }
+
+    // 지도 팝업 기능의 뷰파인더 분기를 추가 지원합니다.
+    function openMap(focusIndex) { 
+        updateDynamicMapPath(focusIndex); 
+        document.getElementById('map-modal').classList.remove('hidden'); 
+        document.getElementById('map-modal').classList.add('flex'); 
+    }
+
+    function navigateBack() {
+        clearTypingTimeouts(); stopTypingSound(); isTyping = false;
+        detailPage.classList.remove('page-active'); detailPage.classList.add('page-hidden-right');
+        homePage.classList.remove('page-hidden-left'); homePage.classList.add('page-active');
+    }
+
+    function revealStory() {
+        initAudio(); interactionZone.style.display = 'none';
+        storyContainer.classList.add('revealed');
+        setTimeout(() => { startTypewriter(currentStoryHtml); }, 300);
+    }
+
+    function clearTypingTimeouts() { typeTimeouts.forEach(clearTimeout); typeTimeouts = []; }
+
+    function startTypewriter(html) {
+        isTyping = true; storyText.innerHTML = ''; startTypingSound(); 
+        let tokens = html.match(/(<.*?>|[^<]+)/g); 
+        if(!tokens) { onTypewriterComplete(); return; }
+        let tokenIndex = 0, charIndex = 0, currentHtml = '';
+        
+        function type() {
+            if (!isTyping) return;
+            if (tokenIndex >= tokens.length) { onTypewriterComplete(); return; }
+            let token = tokens[tokenIndex];
+            if (token.startsWith('<')) {
+                currentHtml += token; storyText.innerHTML = currentHtml;
+                tokenIndex++; type(); 
+            } else {
+                if (charIndex < token.length) {
+                    currentHtml += token.charAt(charIndex);
+                    storyText.innerHTML = currentHtml + '<span class="inline-block w-1 h-4 ml-0.5 align-middle bg-gray-500 animate-pulse"></span>'; 
+                    charIndex++;
+                    const scrollArea = document.querySelector('.scrollable-area');
+                    if(scrollArea) scrollArea.scrollTop = scrollArea.scrollHeight;
+                    const humanizeDelay = Math.floor(Math.random() * 20);
+                    typeTimeouts.push(setTimeout(type, baseTypingSpeed + humanizeDelay));
+                } else {
+                    charIndex = 0; tokenIndex++; type();
+                }
+            }
+        }
+        const baseTypingSpeed = 30;
+        type();
+    }
+
+    storyText.onclick = function() {
+        if (isTyping) {
+            isTyping = false; clearTypingTimeouts(); stopTypingSound(); 
+            storyText.innerHTML = currentStoryHtml; onTypewriterComplete();
+            setTimeout(() => {
+                const scrollArea = document.querySelector('.scrollable-area');
+                if(scrollArea) scrollArea.scrollTop = scrollArea.scrollHeight;
+            }, 50);
+        }
+    };
+
+    function onTypewriterComplete() {
+        isTyping = false; stopTypingSound(); 
+        storyText.classList.remove('cursor-pointer'); storyText.innerHTML = currentStoryHtml; 
+        nextSpotBtn.style.display = 'flex'; nextSpotBtn.style.opacity = '0'; nextSpotBtn.style.transform = 'translateY(10px)';
+        
+        if (currentSpotIndex < tourData.length - 1) {
+            nextSpotBtn.innerHTML = `다음 장소 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>`;
+        } else {
+            nextSpotBtn.innerHTML = `<span class="bg-blue-100 text-blue-700 px-2 py-1 rounded-md mr-2 text-xs flex-shrink-0">안내</span> <span class="text-sm font-bold text-blue-600">첫 번째 장소로 돌아가기 💡</span>`;
+        }
+        
+        setTimeout(() => { nextSpotBtn.style.transition = 'all 0.4s ease'; nextSpotBtn.style.opacity = '1'; nextSpotBtn.style.transform = 'translateY(0)'; }, 50);
+        setTimeout(() => { const scrollArea = document.querySelector('.scrollable-area'); if(scrollArea) scrollArea.scrollTop = scrollArea.scrollHeight; }, 100);
+    }
+
+    function goToNextSpot() {
+        navigateBack();
+        setTimeout(() => {
+            // 다음에 가야 할 스팟 인덱스를 계산합니다.
+            const nextSpotIndex = currentSpotIndex + 1;
+            const targetMapIndex = nextSpotIndex < tourData.length ? nextSpotIndex : 0;
+            
+            // 지도 모달에 이동 목표 인덱스를 전달하여 해당 구간만 선과 핀포인트를 노출시킵니다.
+            openMap(targetMapIndex);
+            
+            setTimeout(() => {
+                const nextSpotNum = targetMapIndex + 1;
+                if (nextSpotIndex < tourData.length) {
+                    openConfirmModal("🐾 길찾기 안내", `다음 목적지는 [Spot ${nextSpotNum}. ${tourData[targetMapIndex].title}] 입니다!\n\n지도 노선 끝에 반짝이는 핀포인트를 따라 이동 후, 팻말에 NFC를 가볍게 태그해 주세요.`, () => {}, false);
+                } else {
+                    openConfirmModal("🎉 탐험 완료!", "모든 야외가든 에피소드를 정복하셨습니다! 첫 번째 장소로 다시 가볼까요?", () => {}, false);
+                }
+            }, 550);
+        }, 450);
+    }
+
+    function openNFCGuide() { document.getElementById('nfc-modal').classList.remove('hidden'); document.getElementById('nfc-modal').classList.add('flex'); }
+    function closeNFCGuide() { document.getElementById('nfc-modal').classList.add('hidden'); document.getElementById('nfc-modal').classList.remove('flex'); }
+    function openMap(focusIndex) { updateDynamicMapPath(focusIndex); document.getElementById('map-modal').classList.remove('hidden'); document.getElementById('map-modal').classList.add('flex'); }
+    function closeMap() { document.getElementById('map-modal').classList.add('hidden'); document.getElementById('map-modal').classList.remove('flex'); }
+
+    let mapZoomLevel = 100; 
+    function zoomMap(direction) {
+        const mapWrapper = document.getElementById('map-zoom-wrapper');
+        mapZoomLevel = direction === 'in' ? Math.min(300, mapZoomLevel + 50) : Math.max(100, mapZoomLevel - 50); 
+        mapWrapper.style.width = `${mapZoomLevel}%`;
+    }
+</script>
 </body>
 </html>
