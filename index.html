@@ -412,11 +412,11 @@
 </div>
 
 <script>
-    // [마스터 버전] 초기값을 모든 스팟이 해제된 상태(10)로 강제 설정하여 NFC 태깅 없이도 전체 콘텐츠에 접근할 수 있도록 함.
-    let unlockedSpotIndex = parseInt(localStorage.getItem('snoopyUnlockedSpot') || '10'); 
-    if (unlockedSpotIndex < 10) {
-        unlockedSpotIndex = 10;
-        localStorage.setItem('snoopyUnlockedSpot', '10');
+    // [NFC 잠금 버전] 초기값을 비글 스카우트(Spot 2, 인덱스 1)까지만 열어둔 상태로 설정하고, 나머지는 NFC 태깅을 통해 해제하도록 함.
+    let unlockedSpotIndex = parseInt(localStorage.getItem('snoopyUnlockedSpot') || '1'); 
+    if (unlockedSpotIndex < 1) {
+        unlockedSpotIndex = 1;
+        localStorage.setItem('snoopyUnlockedSpot', '1');
     }
     let isTyping = false; 
     let typeTimeouts = [];
@@ -698,7 +698,7 @@
             if (confirmed) {
                 localStorage.removeItem('snoopyUnlockedSpot');
                 localStorage.removeItem('snoopyClearedMissions');
-                unlockedSpotIndex = -1; // 1번도 잠기도록 -1로 리셋
+                unlockedSpotIndex = 1; // 비글스카우트(Spot 2)까지만 열리도록 1로 리셋
                 initList();
                 showToast("진행이 초기화되었습니다.", "info");
             }
